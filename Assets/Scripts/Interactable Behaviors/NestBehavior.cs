@@ -16,6 +16,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Transform _entitiesContainer;
     [SerializeField] private Faction _faction = Faction.Ally;
     [SerializeField] private GameObject _playerObject;
+    [SerializeField] private Transform _minionSpawnPosition;
 
 
 
@@ -69,7 +70,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
         _eggsIncubating--;
 
         //SpawnMinion
-        Instantiate(_minionPrefab, transform.position, Quaternion.identity,_entitiesContainer);
+        Instantiate(_minionPrefab, _minionSpawnPosition.position, Quaternion.identity,_entitiesContainer);
     }
 
 
