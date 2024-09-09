@@ -6,7 +6,6 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     [SerializeField] private int _nutrition = 100;
 
 
-
     //Monos
 
 
@@ -48,6 +47,10 @@ public class PickupBehavior : MonoBehaviour, ITargetable
         return gameObject;
     }
 
+    public void TriggerGravity()
+    {
+        GetComponent<Rigidbody>().useGravity = true;
+    }
 
 
 

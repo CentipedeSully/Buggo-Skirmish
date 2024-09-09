@@ -15,6 +15,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private GameObject _minionPrefab;
     [SerializeField] private Transform _entitiesContainer;
     [SerializeField] private Faction _faction = Faction.Ally;
+    [SerializeField] private GameObject _playerObject;
 
 
 
@@ -102,7 +103,8 @@ public class NestBehavior : MonoBehaviour, ITargetable
         return 0;
     }
 
-
-
-
+    public void TriggerGravity()
+    {
+        //ignore
+    }
 }

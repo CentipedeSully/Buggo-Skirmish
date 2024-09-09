@@ -39,6 +39,8 @@ public interface ITargetable
     public GameObject GetGameObject();
 
     public int Nutrition();
+
+    public void TriggerGravity();
 }
 
 
@@ -48,6 +50,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [Header("References")]
     [SerializeField] private Transform _carryParent;
     [SerializeField] private NavMeshAgent _selfAgent;
+    [SerializeField] private Animator _headAnimator;
 
     [Header("Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Minion;
@@ -68,7 +71,13 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private bool _isTargetInRange = false;
     [SerializeField] private float _distanceFromTarget;
     [SerializeField] private GameObject _carriedObject;
+    private bool _isHeadTilted = false;
 
+    [Header("Carry Lerp Utils")]
+    [SerializeField] private float _pickupDuration = .1f;
+    private Vector3 _pickupObjectPosition;
+    private float _currentPickupLerpTime = 0;
+    private bool _isLerpingPickup = false;
 
 
 
@@ -76,6 +85,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     //Monobehaviours
     private void Update()
     {
+        ManagePickupLerp();
         PursueTargetIfTargetAvailable();
     }
 
@@ -109,7 +119,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
         //is it far enough to justify a move order?
         if (_isTargetInRange == false)
         {
-            Debug.Log("Approach Logic Reached...");
             //are we NOT already moving towards this position
             if (!_isMoving || _targetPosition != _currentTarget.transform.position)
             {
@@ -122,7 +131,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
                 _isMoving=true;
 
-                Debug.Log("Completed Approach Logic.");
             }
         }
     }
@@ -189,6 +197,22 @@ public class AiBehavior : MonoBehaviour, ITargetable
         
     }
 
+    private void ManagePickupLerp()
+    {
+        if ( _isLerpingPickup)
+        {
+            _currentPickupLerpTime += Time.deltaTime;
+            _carriedObject.transform.localPosition = Vector3.Lerp(_pickupObjectPosition, _carryParent.localPosition, _currentPickupLerpTime / _pickupDuration);
+
+            if (_currentPickupLerpTime >= _pickupDuration)
+            {
+                _isLerpingPickup = false;
+                _currentPickupLerpTime = 0;
+            }
+            
+        }
+    }
+
     private void PursueTargetIfTargetAvailable()
     {
         if (_currentTarget != null)
@@ -212,6 +236,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
         {
             _carriedObject = targetObject;
             _carriedObject.transform.SetParent(_carryParent);
+
+            //show pickup animation
+            _headAnimator.SetBool("isCarrying", true);
+
+            //setup lerp utils
+            _pickupObjectPosition = _carriedObject.transform.localPosition;
+            _currentPickupLerpTime = 0;
+
+            //start lerping
+            _isLerpingPickup = true;
         }
     }
 
@@ -220,7 +254,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
         if (_carriedObject != null)
         {
             _carriedObject.transform.SetParent(null);
+
+            //Toggle gravity for the funny "toss it away" effect ^_^
+            _carriedObject.GetComponent<ITargetable>().TriggerGravity();
+
             _carriedObject = null;
+
+            //show drop animation
+            _headAnimator.SetBool("isCarrying", false);
+
+
         }
     }
 
@@ -313,6 +356,10 @@ public class AiBehavior : MonoBehaviour, ITargetable
         return _faction;
     }
 
+    public void TriggerGravity()
+    {
+        GetComponent<Rigidbody>().useGravity = true;
+    }
 
 
     //Debugging
