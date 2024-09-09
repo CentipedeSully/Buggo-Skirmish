@@ -15,7 +15,7 @@ public class PlayerManipulator : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float _maxCastDistance = 45f;
     [SerializeField] private LayerMask _layerMask;
-    [SerializeField] private NavMeshAgent _currentAgent;
+    [SerializeField] private AiBehavior _minionAi;
 
     [Header("Detection Results")]
     [SerializeField] private bool _isGroundDetected = false;
@@ -38,11 +38,6 @@ public class PlayerManipulator : MonoBehaviour
 
 
     //Internals
-    private void CommandMove(Vector3 position)
-    {
-        if (_currentAgent != null)
-            _currentAgent.SetDestination(position);
-    }
 
     private void CastMouseRay()
     {
@@ -63,22 +58,46 @@ public class PlayerManipulator : MonoBehaviour
         if (detections.Length == 0)
             return;
 
-        //Get the index of the closest detection
-        int closestIndex = detections.Length - 1;
-
-        //save the first (closest) detection only
-        _detectedObject = detections[closestIndex].collider.gameObject;
-
-        //save the contact point if we hit the ground
-        if (_detectedObject.CompareTag("Ground"))
+        //prioritize Actor detections first
+        foreach(RaycastHit detection in detections)
         {
-            _isGroundDetected = true;
-            _detectedGroundPosition = detections[closestIndex].point;
+            if (detection.collider.CompareTag("Actor"))
+            {
+                _detectedObject = detection.collider.gameObject;
+                break;
+            }
         }
 
-        else
-            _isGroundDetected= false;
-            
+        //if no actors were detected, try again and prioritize finding pickups
+        if (_detectedObject == null)
+        {
+            foreach (RaycastHit detection in detections)
+            {
+                if (detection.collider.CompareTag("Pickup"))
+                {
+                    _detectedObject = detection.collider.gameObject;
+                    break;
+                }
+            }
+        }
+        
+
+        //if we also failed to detect any pickups, then it's probably just floor here
+        if (_detectedObject == null)
+        {
+            foreach (RaycastHit detection in detections)
+            {
+                if (detection.collider.CompareTag("Ground"))
+                {
+                    _detectedObject = detection.collider.gameObject;
+
+                    //save the contact point
+                    _isGroundDetected = true;
+                    _detectedGroundPosition = detection.point;
+                    break;
+                }
+            }
+        }   
 
     }
 
@@ -102,16 +121,20 @@ public class PlayerManipulator : MonoBehaviour
 
 
     //Externals
-    public void CommandMoveOnInput(InputAction.CallbackContext context)
+    public void CommandPursuitOnInput(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            //Capture our world-mouse position
+            //capture mouse-position
             CastMouseRay();
 
-            //move our current agent if our raycast hit the ground
-            if (_isGroundDetected)
-                CommandMove(_detectedGroundPosition);
+            //set the target if it isn't the ground
+            if (!_isGroundDetected)
+            {
+                ITargetable target = _detectedObject.GetComponent<ITargetable>();
+                _minionAi.SetPursuitTarget(target);
+            }
+            
         }
     }
 
