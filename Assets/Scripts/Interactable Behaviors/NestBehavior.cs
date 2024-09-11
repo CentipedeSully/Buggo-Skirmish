@@ -22,7 +22,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
 
 
     //Monobehaviours
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         ITargetable behavior = other.GetComponent<ITargetable>();
 
@@ -30,24 +30,28 @@ public class NestBehavior : MonoBehaviour, ITargetable
         {
             if (behavior.GetInteractableType() == InteractableType.Pickup)
             {
-                //increase the nest's nutrition value
-                _currentNutrition += behavior.Nutrition();
-
-                //destroy the pickup
-                Destroy(other.gameObject);
-                
-                //can we create an egg?
-                if (_currentNutrition >= _eggCost)
+                //wait for the pickup to be dropped!
+                if (behavior.IsPickedUp() == false)
                 {
-                    
-                    int incubations = _currentNutrition / _eggCost;
+                    //increase the nest's nutrition value
+                    _currentNutrition += behavior.Nutrition();
 
-                    //Begin Incubating as many eggs as possible!
-                    while (incubations > 0)
+                    //destroy the pickup
+                    Destroy(other.gameObject);
+
+                    //can we create an egg?
+                    if (_currentNutrition >= _eggCost)
                     {
-                        _currentNutrition -= _eggCost;
-                        IncubateEgg();
-                        incubations--;
+
+                        int incubations = _currentNutrition / _eggCost;
+
+                        //Begin Incubating as many eggs as possible!
+                        while (incubations > 0)
+                        {
+                            _currentNutrition -= _eggCost;
+                            IncubateEgg();
+                            incubations--;
+                        }
                     }
                 }
             }
@@ -67,10 +71,14 @@ public class NestBehavior : MonoBehaviour, ITargetable
 
     private void HatchMinion()
     {
+        //decrement the number of eggs being incubated
         _eggsIncubating--;
 
         //SpawnMinion
-        Instantiate(_minionPrefab, _minionSpawnPosition.position, Quaternion.identity,_entitiesContainer);
+        GameObject newMinionObject =Instantiate(_minionPrefab, _minionSpawnPosition.position, Quaternion.identity,_entitiesContainer);
+
+        //setup the minion's utils
+        newMinionObject.GetComponent<AiBehavior>().SetNest(gameObject);
     }
 
 
@@ -104,8 +112,13 @@ public class NestBehavior : MonoBehaviour, ITargetable
         return 0;
     }
 
-    public void TriggerGravity()
+    public void SetPickupState(bool state)
     {
         //ignore
+    }
+
+    public bool IsPickedUp()
+    {
+        return false;
     }
 }

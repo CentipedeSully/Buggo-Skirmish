@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.GraphicsBuffer;
 
 
 
@@ -40,7 +41,9 @@ public interface ITargetable
 
     public int Nutrition();
 
-    public void TriggerGravity();
+    public void SetPickupState(bool state);
+
+    public bool IsPickedUp();
 }
 
 
@@ -66,11 +69,15 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     [Header("Behavior State")]
     [SerializeField] private ActorState _currentState = ActorState.Idle;
-    [SerializeField] private GameObject _currentTarget;
-    [SerializeField] private Vector3 _targetPosition;
+    [SerializeField] private GameObject _currentTargetObject;
+    private ITargetable _targetInterface;
+    private Vector3 _currentTargetGroundPosition;
+    private bool _isMovingToGroundPosition = false;
+    private Vector3 _targetPosition;
     [SerializeField] private bool _isTargetInRange = false;
     [SerializeField] private float _distanceFromTarget;
-    [SerializeField] private GameObject _carriedObject;
+    [SerializeField] private bool _isCarryingObject = false;
+    private GameObject _carriedObject;
     private bool _isHeadTilted = false;
 
     [Header("Carry Lerp Utils")]
@@ -86,6 +93,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     private void Update()
     {
         ManagePickupLerp();
+        ValidateTargetingReferences();
         PursueTargetIfTargetAvailable();
     }
 
@@ -95,17 +103,100 @@ public class AiBehavior : MonoBehaviour, ITargetable
     //Internals
     private void SetTarget(GameObject target)
     {
+        if (_isMovingToGroundPosition)
+            _isMovingToGroundPosition = false;
+
         //Replace the current Target
-        _currentTarget = target;
+        _currentTargetObject = target;
+
+        //cache the target's behavior
+        if (_currentTargetObject != null)
+            _targetInterface = _currentTargetObject.GetComponent<ITargetable>();
+        else _targetInterface = null;
+
+        //Determine your state based on your new target
+        DetermineStateBasedOnTarget();
+
+        //drop what you're doing if we're being re-tasked
+        if (_isCarryingObject && _currentState != ActorState.Collect)
+            DropObject();
 
         //reset movement utils
         _isMoving = false;
         _selfAgent.isStopped = true;
     }
 
+    private void DetermineStateBasedOnTarget()
+    {
+        //go idle if the target got cleared
+        if (_currentTargetObject == null)
+        {
+            _currentState = ActorState.Idle;
+            return;
+        }
+
+        //are we fetching a pickup or carrying a pickup to the nest?
+        if (_targetInterface.GetInteractableType() == InteractableType.Pickup ||
+            (_targetInterface.GetInteractableType() == InteractableType.Nest && _isCarryingObject) )
+        {
+            _currentState = ActorState.Collect;
+        }
+
+        //are we targeting the player?
+        else if (_targetInterface.GetInteractableType() == InteractableType.Player)
+        {
+            //follow the leader if we're on the same team
+            if (_targetInterface.GetFaction() == _faction)
+                _currentState = ActorState.Follow;
+
+            //else Eff that guy!
+            else 
+                _currentState = ActorState.Fight;
+        }
+            
+        //are we targeting an enemy minion?
+        else if (_targetInterface.GetInteractableType() == InteractableType.Minion &&
+            _targetInterface.GetFaction() != _faction )
+        {
+            _currentState = ActorState.Fight;
+        }
+            
+    }
+
+    private void ValidateTargetingReferences()
+    {
+        //did the target vanitsh?
+        if (_currentTargetObject == null)
+            SetTarget(null);
+
+
+        else
+        {
+            //are we pursuing an object that is already picked up?
+            if (_targetInterface.GetInteractableType() == InteractableType.Pickup && 
+                _targetInterface.IsPickedUp())
+                SetTarget(null);
+
+            //are we attempting to pickup an object but have no nest reference for the dropoff?
+            if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
+                _nestObject == null)
+            {
+                SetTarget(null);
+                Debug.LogWarning("Minion attempted to pickup an object without the minion having a reference to its nest");
+            }
+
+            //are we carrying a pickup but lost our nest reference
+            if (_isCarryingObject && _nestObject == null)
+            {
+                DropObject();
+                Debug.LogWarning("Nest reference is missing while minion sought to drop off an item");
+            }
+        }
+    }
+
     private void CalculateDistanceFromCurrentTarget()
     {
-        _distanceFromTarget = Vector3.Distance(_currentTarget.transform.position, transform.position);
+        _distanceFromTarget = Vector3.Distance(_currentTargetObject.transform.position, transform.position);
 
         if (_distanceFromTarget <= _interactionRange)
             _isTargetInRange = true;
@@ -120,16 +211,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
         if (_isTargetInRange == false)
         {
             //are we NOT already moving towards this position
-            if (!_isMoving || _targetPosition != _currentTarget.transform.position)
+            if (!_isMoving || _targetPosition != _currentTargetObject.transform.position)
             {
-                //save the move position
-                _targetPosition = _currentTarget.transform.position;
+                //save the move position. Do this to to avoid repathing to an object that isn't changing its position
+                _targetPosition = _currentTargetObject.transform.position;
 
                 //move towards the position
                 _selfAgent.SetDestination(_targetPosition);
                 _selfAgent.isStopped = false;
 
-                _isMoving=true;
+                _isMoving = true;
 
             }
         }
@@ -154,7 +245,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             {
                 case ActorState.Idle:
                     //chill
-                    _currentTarget = null;
+                    _currentTargetObject = null;
                     break;
 
                 case ActorState.Follow:
@@ -162,14 +253,11 @@ public class AiBehavior : MonoBehaviour, ITargetable
                     break;
 
                 case ActorState.Collect:
-                    //get the behavior of the pickup
-                    ITargetable behavior = _currentTarget.GetComponent<ITargetable>();
-
                     //if the target is a pickup?
-                    if (behavior.GetInteractableType() == InteractableType.Pickup)
+                    if (_targetInterface.GetInteractableType() == InteractableType.Pickup)
                     {
                         //pickup the thing
-                        PickupObject(_currentTarget);
+                        PickupObject(_currentTargetObject);
 
                         //Set the nest as the target
                         SetTarget(_nestObject);
@@ -177,7 +265,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
 
                     //else the target is the nest itself
-                    else if (behavior.GetInteractableType() == InteractableType.Nest)
+                    else if (_targetInterface.GetInteractableType() == InteractableType.Nest)
                     {
                         //Drop Pickup
                         DropObject();
@@ -215,7 +303,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void PursueTargetIfTargetAvailable()
     {
-        if (_currentTarget != null)
+        if (_currentTargetObject != null)
         {
             CalculateDistanceFromCurrentTarget();
             ApproachTheCurrentTarget();
@@ -237,6 +325,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _carriedObject = targetObject;
             _carriedObject.transform.SetParent(_carryParent);
 
+            //make sure the object knows its picked up
+            _carriedObject.GetComponent<ITargetable>().SetPickupState(true);
+
             //show pickup animation
             _headAnimator.SetBool("isCarrying", true);
 
@@ -246,6 +337,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
             //start lerping
             _isLerpingPickup = true;
+
+            _isCarryingObject = true;
         }
     }
 
@@ -253,19 +346,25 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         if (_carriedObject != null)
         {
+            //tell the object its been dropped
+            _carriedObject.GetComponent<ITargetable>().SetPickupState(false);
+
+            //unparent
             _carriedObject.transform.SetParent(null);
 
-            //Toggle gravity for the funny "toss it away" effect ^_^
-            _carriedObject.GetComponent<ITargetable>().TriggerGravity();
-
+            //clear our reference to the object
             _carriedObject = null;
 
             //show drop animation
             _headAnimator.SetBool("isCarrying", false);
 
+            _isCarryingObject = false;
+
 
         }
     }
+
+
 
 
     //Externals
@@ -278,62 +377,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         //is the target not null and NOT OURSELF
         if (target != null && target.GetBehaviorID() != GetInstanceID())
-        {
-            //Identify the target
-            switch (target.GetInteractableType())
-            {
-                case InteractableType.Minion:
-
-                    //is this minion against us?
-                    if (target.GetFaction() != _faction)
-                    {
-                        //set the minion as our target
-                        SetTarget(target.GetGameObject());
-
-                        //enter attack mode
-                        _currentState = ActorState.Fight;
-                    }
-                    break;
-
-
-                case InteractableType.Player:
-
-                    //set the player as our pursuit target
-                    SetTarget(target.GetGameObject());
-
-                    //enter attack mode if the player isn't on our side
-                    if (target.GetFaction() != _faction)
-                        _currentState = ActorState.Fight;
-
-                    //otherwise just follow the player
-                    else
-                        _currentState = ActorState.Follow;
-
-                    break;
-
-
-                case InteractableType.Pickup:
-                    SetTarget(target.GetGameObject());
-                    _currentState = ActorState.Collect;
-                    break;
-
-
-                case InteractableType.Nest:
-                    SetTarget(target.GetGameObject());
-                    _currentState = ActorState.Collect;
-                    break;
-
-
-                case InteractableType.Unset:
-                    Debug.LogWarning($"Unset Interactable type detected ({target.GetGameObject()}). Minion ignoring object.");
-                    break;
-            }
-
-        }
-
-        
-
-        
+            SetTarget(target.GetGameObject());
+        else
+            SetTarget(null);
     }
 
     public int GetBehaviorID()
@@ -356,11 +402,32 @@ public class AiBehavior : MonoBehaviour, ITargetable
         return _faction;
     }
 
-    public void TriggerGravity()
+    public void SetPickupState(bool state)
     {
         GetComponent<Rigidbody>().useGravity = true;
     }
 
+    public void MoveToPosition(Vector3 position)
+    {
+        //clear the current targeting data
+        if (_currentTargetObject != null)
+            SetTarget(null);
+            
+        //Simply move to the destination
+        _isMoving = true;
+        _selfAgent.isStopped = false;
+        _selfAgent.SetDestination(position);
+    }
+
+    public void SetNest(GameObject nest)
+    {
+        _nestObject = nest;
+    }
+
+    public bool IsPickedUp()
+    {
+        return false;
+    }
 
     //Debugging
 

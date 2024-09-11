@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: f26805241f731fa46bd8117ed72f56a1, type: 2}
+    - target: {fileID: 803089149892858757, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: m_Constraints
+      value: 112
+      objectReference: {fileID: 0}
     - target: {fileID: 2838942970441888320, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
@@ -84,8 +88,48 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3046112125697519415, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 6028751558855064469}
   m_SourcePrefab: {fileID: 100100000, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+--- !u!4 &6140723855698517881 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 850978876430756736, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+  m_PrefabInstance: {fileID: 6843064638547522809}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8408930645025004494 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3046112125697519415, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+  m_PrefabInstance: {fileID: 6843064638547522809}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6028751558855064469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8408930645025004494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed6da87c65b821e40a3a17a62a08f299, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mainCam: {fileID: 0}
+  _cameraParent: {fileID: 0}
+  _playerInputReference: {fileID: 0}
+  _playerManipulator: {fileID: 0}
+  _bodyModelTransform: {fileID: 6140723855698517881}
+  _moveSpeed: 3
+  _cameraRotationSpeed: 270
+  _signalRadius: 10
+  _signalRadiusGizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  _actionCooldownDuration: 0.1
+  _bodyRotationLerpDuration: 0.3
+  _moveDirectionGizmoColor: {r: 0, g: 1, b: 1, a: 1}
+  _gizmoLineLength: 5
+  _activeFollowers: []

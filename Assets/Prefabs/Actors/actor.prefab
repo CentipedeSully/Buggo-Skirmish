@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8504254876893674962}
   - component: {fileID: 4168536041200413153}
   m_Layer: 7
-  m_Name: grunt
+  m_Name: body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
