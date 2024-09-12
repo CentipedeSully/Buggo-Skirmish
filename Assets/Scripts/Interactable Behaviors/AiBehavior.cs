@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.Burst.Intrinsics;
 using Unity.VisualScripting;
@@ -64,10 +65,17 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private NavMeshAgent _selfAgent;
     [SerializeField] private Animator _headAnimator;
     [SerializeField] private Animator _bodyAnimator;
+    [SerializeField] private Rigidbody _rb;
+    [SerializeField] private bool _isGravityEnabled = false;
+    [SerializeField] private float _gravityResetTime = 3f;
 
     [Header("Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Minion;
     [SerializeField] private Faction _faction;
+    [SerializeField] private float _onDeathThrowForceMin;
+    [SerializeField] private float _onDeathThrowForceMax;
+    [SerializeField] private float _onDeathThrowTorqueMin;
+    [SerializeField] private float _onDeathThrowTorqueMax;
     [SerializeField] private float _interactionRange = .5f;
     [SerializeField] private int _nutrition = 34;
     [SerializeField] private float _interactableDetectionRange = 4;
@@ -96,6 +104,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private bool _isCarryingObject = false;
     private GameObject _carriedObject;
     private bool _isReadyToBePickedUp = false;
+    private bool _isPickedUp = false;
+    private float _pickupCooldown = 3;
     private bool _isDead = false;
 
     [Header("Carry Lerp Utils")]
@@ -598,37 +608,47 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void ValidateTargetingReferences()
     {
-        //Did a target object vanish while we were following it (ignore if we were only moving to a ground position)
-        if (_currentTargetObject == null && _isMovingToGroundPosition == false)
-            SetTarget(null);
-
-
-        else if (_isMovingToGroundPosition == false && _currentTargetObject != null)
+        try
         {
-            //Did we suddenly lose our behavior reference?
-            if (_targetInterface == null || _currentTargetObject == null)
+            //Did a target object vanish while we were following it (ignore if we were only moving to a ground position)
+            if (_currentTargetObject == null && _isMovingToGroundPosition == false)
                 SetTarget(null);
 
-            //are we pursuing an object that is already picked up?
-            if (_targetInterface.GetInteractableType() == InteractableType.Pickup && 
-                _targetInterface.IsPickedUp())
-                SetTarget(null);
 
-            //are we attempting to pickup an object but have no nest reference for the dropoff?
-            if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
-                _nestObject == null)
+            else if (_isMovingToGroundPosition == false && _currentTargetObject != null)
             {
-                SetTarget(null);
-                Debug.LogWarning("Minion attempted to pickup an object without the minion having a reference to its nest");
-            }
+                //Did we suddenly lose our behavior reference?
+                if (_targetInterface == null || _currentTargetObject == null)
+                    SetTarget(null);
 
-            //are we carrying a pickup but lost our nest reference
-            if (_isCarryingObject && _nestObject == null)
-            {
-                DropObjectIfCarrying();
-                Debug.LogWarning("Nest reference is missing while minion sought to drop off an item");
+                //are we pursuing an object that is already picked up?
+                if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
+                    _targetInterface.IsPickedUp())
+                    SetTarget(null);
+
+                //are we attempting to pickup an object but have no nest reference for the dropoff?
+                if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
+                    _nestObject == null)
+                {
+                    SetTarget(null);
+                    //Debug.LogWarning("Minion attempted to pickup an object without the minion having a reference to its nest");
+                }
+
+                //are we carrying a pickup but lost our nest reference
+                if (_isCarryingObject && _nestObject == null)
+                {
+                    DropObjectIfCarrying();
+                    //Debug.LogWarning("Nest reference is missing while minion sought to drop off an item");
+                }
             }
         }
+
+        catch(NullReferenceException)
+        {
+            DropObjectIfCarrying();
+            SetTarget(null);
+        }
+        
     }
 
     private void CalculateDistanceFromCurrentTarget()
@@ -859,18 +879,62 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         _isDead = true;
         _interactableType = InteractableType.Pickup;
+        _faction = Faction.Neutral;
 
         //Set animator state to isDead
         _bodyAnimator.SetBool("isDead", true);
 
+        //disable the navAgent
+        _selfAgent.enabled = false;
+
         //throw the body around a bit ^_^
-        //...
+        TemporarilyEnableGravity();
+        float xRandom = UnityEngine.Random.Range(-1, 1);
+        float yRandom = UnityEngine.Random.Range(-1, 1);
+        float zRandom = UnityEngine.Random.Range(-1, 1);
+        
+        //be sure to remove the rotational constraints for *authentic ragdoll flavor
+        _rb.constraints = RigidbodyConstraints.None;
+        _rb.AddForce(Vector3.up * UnityEngine.Random.Range(_onDeathThrowForceMin, _onDeathThrowForceMax), ForceMode.Impulse);
+        _rb.AddTorque(new Vector3(xRandom, yRandom, zRandom) * UnityEngine.Random.Range(_onDeathThrowTorqueMin, _onDeathThrowTorqueMax), ForceMode.Impulse);
+
+
+        //make it available for pickup after a delay
+        Invoke(nameof(ReadyPickup), _pickupCooldown);
 
         //remove ourself from the leader's followers
         if (_leaderObject != null)
             _leaderObject.GetComponent<PlayerBehavior>().RemoveFollower(this);
     }
 
+    private void DisableGravity()
+    {
+        if (_isGravityEnabled)
+        {
+            _rb.useGravity = false;
+            _isGravityEnabled = false;
+
+            CancelInvoke(nameof(DisableGravity));
+        }
+    }
+
+    private void TemporarilyEnableGravity()
+    {
+        //is gravity off?
+        if (!_isGravityEnabled)
+        {
+            _rb.useGravity = true;
+            _isGravityEnabled = true;
+
+            //start counting down before gravity is stopped
+            Invoke(nameof(DisableGravity), _gravityResetTime);
+        }
+    }
+
+    private void ReadyPickup()
+    {
+        _isReadyToBePickedUp = true;
+    }
 
 
     //Externals
@@ -906,11 +970,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
         return _faction;
     }
 
-    public void SetPickupState(bool state)
-    {
-        GetComponent<Rigidbody>().useGravity = true;
-    }
-
     public void MoveToPosition(Vector3 position)
     {
         //clear the current targeting data
@@ -937,7 +996,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     public bool IsPickedUp()
     {
-        return false;
+        return _isPickedUp;
     }
 
     public bool IsReadyForPickup()
@@ -993,6 +1052,28 @@ public class AiBehavior : MonoBehaviour, ITargetable
     public bool IsDead()
     {
         return _isDead;
+    }
+
+    public void SetPickupState(bool newState)
+    {
+        if (_interactableType == InteractableType.Pickup)
+        {
+            _isPickedUp = newState;
+
+            //make sure gravity is disabled when being carried
+            if (_isPickedUp)
+                DisableGravity();
+
+            //make sure to enable gravity when being dropped
+            else if (!_isPickedUp)
+            {
+                TemporarilyEnableGravity();
+
+                //cooldown the pickup, so it doen't get juggled each frame by ai
+                _isReadyToBePickedUp = false;
+                Invoke(nameof(ReadyPickup), _pickupCooldown);
+            }
+        }
     }
 
     //Debugging

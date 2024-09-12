@@ -171,8 +171,15 @@ MonoBehaviour:
   _selfAgent: {fileID: 2838942970441888320}
   _headAnimator: {fileID: 9204637591340499638}
   _bodyAnimator: {fileID: 3776057667474881949}
+  _rb: {fileID: 803089149892858757}
+  _isGravityEnabled: 0
+  _gravityResetTime: 3
   _interactableType: 2
   _faction: 0
+  _onDeathThrowForceMin: 500
+  _onDeathThrowForceMax: 700
+  _onDeathThrowTorqueMin: 20
+  _onDeathThrowTorqueMax: 150
   _interactionRange: 2.5
   _nutrition: 34
   _interactableDetectionRange: 6
@@ -264,7 +271,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3046112125697519415}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 33.84
   m_Drag: 5
   m_AngularDrag: 4
   m_CenterOfMass: {x: 0, y: 0, z: 0}

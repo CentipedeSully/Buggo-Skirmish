@@ -197,7 +197,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
             Vector3 additiveRotation = new Vector3(0, _cameraInput * _cameraRotationSpeed * Time.deltaTime, 0);
 
             //calculate the sum rotation
-            Vector3 sumRotation = oldRotation + additiveRotation;
+            Vector3 sumRotation = oldRotation - additiveRotation;
 
             //Apply the new rotation
             _cameraParent.transform.eulerAngles = sumRotation;
