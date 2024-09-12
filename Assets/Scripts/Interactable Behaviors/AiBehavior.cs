@@ -143,7 +143,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _damagedAnimResetDelay = .1f;
     [SerializeField] private float _invincTimeAfterHit = .1f;
     [SerializeField] private bool _isInvincible = false;
-
+    private IResourcePoint _lastResourcePoint;
 
 
 
@@ -406,22 +406,13 @@ public class AiBehavior : MonoBehaviour, ITargetable
         }
 
 
-        //Detect pickups
-        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Pickup);
-
-        // if anything was found, go after it
-        if ( closestInteractableObject != null )
-        {
-            SetTarget(closestInteractableObject);
-            return;
-        }
 
 
-        //Detect the player
+        //Next Detect the player, in case the player is hostile
         closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Player);
 
         //if the player was detected
-        if ( closestInteractableObject != null)
+        if (closestInteractableObject != null)
         {
             //attack the player if it isn't on our side
             if (closestInteractableObject.GetComponent<ITargetable>().GetFaction() != _faction)
@@ -431,7 +422,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             }
 
             //player is friendly. 
-            else 
+            else
             {
                 //calculate the player's distance
                 float playerDistance = (closestInteractableObject.transform.position - transform.position).magnitude;
@@ -449,6 +440,30 @@ public class AiBehavior : MonoBehaviour, ITargetable
             }
         }
 
+
+
+
+        //Next Detect any hostile structures
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Nest);
+
+        //if a live hostile nest was found, attack it
+        if (closestInteractableObject != null)
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
+
+
+        
+        //Lastly Detect pickups
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Pickup);
+
+        // if anything was found, go after it
+        if ( closestInteractableObject != null )
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
     }
 
     private void DetectHostilesOnly()
@@ -466,7 +481,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             return;
         }
 
-        //Detect the player last, in case it's hostile
+        //Detect the player next, in case it's hostile
         closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Player);
 
         //if the player was detected
@@ -479,6 +494,34 @@ public class AiBehavior : MonoBehaviour, ITargetable
                 return;
             }
         }
+
+        //Detect any hostile structures
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Nest);
+
+        //if a live hostile nest was found, attack it
+        if (closestInteractableObject != null)
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
+
+    }
+
+    private void DetectAndRememberAnyNearbyResourcePoint()
+    {
+        //detect anything within range
+        Collider[] detectedColliders = Physics.OverlapSphere(transform.position, _interactableDetectionRange, _interactableLayerMask);
+
+        //Detect any nearby resoure points
+        GameObject possibleResourcePointObject = FindClosestResourcePoint(detectedColliders);
+
+        //clear our remembered resource point if nothing was found
+        if (possibleResourcePointObject == null)
+            _lastResourcePoint = null;
+
+        //remmeber this resource point
+        else _lastResourcePoint = possibleResourcePointObject.GetComponent<IResourcePoint>();
+
     }
 
     private GameObject FindClosestDetection(Collider[] detections,InteractableType preferredType)
@@ -508,9 +551,21 @@ public class AiBehavior : MonoBehaviour, ITargetable
                             continue;
                     }
 
-                    //special case: if we're detecting minions, ignore friendlies
+                    //special minion case: ignore friendlies
                     if (preferredType == InteractableType.Minion && behavior.GetFaction() == _faction)
                         continue;
+
+                    //special nest cases to watch out for: 
+                    if (preferredType == InteractableType.Nest)
+                    {
+                        //IGNORE dead nests
+                        if (behavior.IsDead())
+                            continue;
+
+                        //IGNORE friendly nests
+                        if (behavior.GetFaction() == _faction)
+                            continue;
+                    }
 
                     //Do we have no previous valid detection?
                     if (closestDetection == null)
@@ -533,6 +588,47 @@ public class AiBehavior : MonoBehaviour, ITargetable
                             closestDetection = detection.gameObject;
                             closestDistanceSqrt = currentDistanceSqrt;
                         }
+                    }
+                }
+            }
+        }
+
+        //return anything we've found (null if nothing was found)
+        return closestDetection;
+    }
+
+    private GameObject FindClosestResourcePoint(Collider[] detections)
+    {
+        GameObject closestDetection = null;
+        float closestDistanceSqrt = 0;
+
+        foreach (Collider detection in detections)
+        {
+            //attempt to get the detection's behavior
+            IResourcePoint behavior = detection.GetComponent<IResourcePoint>();
+
+            if (behavior != null)
+            {
+                //Do we have no previous valid detection?
+                if (closestDetection == null)
+                {
+                    //this one is the closest by default
+                    closestDetection = detection.gameObject;
+
+                    //save the closest distance sqrt (the length of the magnitude^2-- always positive)
+                    closestDistanceSqrt = (detection.transform.position - transform.position).sqrMagnitude;
+                }
+
+                else
+                {
+                    //detect this object's distance Sqrt
+                    float currentDistanceSqrt = (detection.transform.position - transform.position).sqrMagnitude;
+
+                    //save this detection if it's closer than our previous one
+                    if (currentDistanceSqrt < closestDistanceSqrt)
+                    {
+                        closestDetection = detection.gameObject;
+                        closestDistanceSqrt = currentDistanceSqrt;
                     }
                 }
             }
@@ -580,11 +676,21 @@ public class AiBehavior : MonoBehaviour, ITargetable
             return;
         }
 
-        //are we fetching a pickup or carrying a pickup to the nest?
-        if (_targetInterface.GetInteractableType() == InteractableType.Pickup ||
-            (_targetInterface.GetInteractableType() == InteractableType.Nest && _isCarryingObject) )
+        //are we fetching a pickup or bringing something to our own nest?
+        if (_targetInterface.GetInteractableType() == InteractableType.Pickup || //fetching pickup?
+            (_targetInterface.GetInteractableType() == InteractableType.Nest &&  _targetInterface.GetFaction() ==_faction && _isCarryingObject)) //carrying something to our nest?
         {
             _currentState = ActorState.Collect;
+        }
+
+        //are we targeting a hostile nest structure?
+        if (_targetInterface.GetInteractableType() == InteractableType.Nest && _targetInterface.GetFaction() != _faction)
+        {
+            //is the nest alive?
+            if (!_targetInterface.IsDead())
+                _currentState = ActorState.Fight;
+            else
+                _currentState = ActorState.Idle;
         }
 
         //are we targeting the player?
@@ -737,6 +843,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
                             //Set the nest as the new target
                             SetTarget(_nestObject);
+
+                            //Check if there's any resourcePoint nearby. REmember the closest
+                            DetectAndRememberAnyNearbyResourcePoint();
                         }
                         
                         else
@@ -753,8 +862,18 @@ public class AiBehavior : MonoBehaviour, ITargetable
                         //Drop Pickup
                         DropObjectIfCarrying();
 
-                        //You're at the nest. chill
-                        SetTarget(null);
+                        //Do we remember any resource points?
+                        if (_lastResourcePoint != null)
+                        {
+                            //Go back to that location. Chances are there's more to pickup
+                            MoveToPosition(_lastResourcePoint.GetGameObject().transform.position);
+                        }
+                        else
+                        {
+                            //You're at the nest. chill
+                            SetTarget(null);
+                        }
+                        
                     }
                     break;
 
@@ -937,6 +1056,11 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         _isReadyToBePickedUp = true;
     }
+
+
+
+
+
 
 
     //Externals

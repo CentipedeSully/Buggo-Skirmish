@@ -6,7 +6,7 @@ using TMPro;
 
 
 
-public class NestBehavior : MonoBehaviour, ITargetable
+public class PlayerNestBehavior : MonoBehaviour, ITargetable
 {
     //Declarations
     [SerializeField] private int _currentNutrition;

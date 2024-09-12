@@ -190,7 +190,7 @@ MonoBehaviour:
   _showInteractableDetectionGizmo: 0
   _interactableLayerMask:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 896
   _leaderObject: {fileID: 0}
   _nestObject: {fileID: 0}
   _currentState: 0

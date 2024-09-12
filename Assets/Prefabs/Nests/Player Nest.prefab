@@ -184,7 +184,7 @@ GameObject:
   - component: {fileID: 5612163813420023394}
   - component: {fileID: 2269798332656390421}
   m_Layer: 0
-  m_Name: Nest
+  m_Name: Player Nest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -228,6 +228,7 @@ MonoBehaviour:
   _faction: 2
   _playerObject: {fileID: 0}
   _minionSpawnPosition: {fileID: 4091407011660524480}
+  _health: 60
 --- !u!65 &2269798332656390421
 BoxCollider:
   m_ObjectHideFlags: 0

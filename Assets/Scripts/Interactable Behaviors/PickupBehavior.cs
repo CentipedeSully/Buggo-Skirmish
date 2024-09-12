@@ -14,7 +14,7 @@ public class PickupBehavior : MonoBehaviour, ITargetable
 
     //Monos
 
-    private void Start()
+    private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
     }

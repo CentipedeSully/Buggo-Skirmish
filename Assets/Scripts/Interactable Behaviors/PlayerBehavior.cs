@@ -279,8 +279,8 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
             ITargetable target = _playerManipulator.GetDetectedObject().GetComponent<ITargetable>();
 
-            //Ally?
-            if (target.GetFaction() == Faction.Ally)
+            //Ally? (and not ourself!)
+            if (target.GetFaction() == Faction.Ally && target.GetBehaviorID() != GetInstanceID())
             {
                 //get the ally's behavior
                 AiBehavior minion = target.GetGameObject().GetComponent<AiBehavior>();
