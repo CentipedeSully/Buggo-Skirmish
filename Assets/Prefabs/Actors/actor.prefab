@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 2838942970441888320}
   - component: {fileID: 1722336184884299765}
   - component: {fileID: 803089149892858757}
+  - component: {fileID: 3776057667474881949}
   m_Layer: 7
   m_Name: actor
   m_TagString: Actor
@@ -169,25 +170,49 @@ MonoBehaviour:
   _carryParent: {fileID: 3944319591578894396}
   _selfAgent: {fileID: 2838942970441888320}
   _headAnimator: {fileID: 9204637591340499638}
+  _bodyAnimator: {fileID: 3776057667474881949}
   _interactableType: 2
   _faction: 0
   _interactionRange: 2.5
   _nutrition: 34
-  _pickupLayerMask:
+  _interactableDetectionRange: 6
+  _autoFollowLeaderRange: 3
+  _interactableRangeGizmoColor: {r: 1, g: 1, b: 1, a: 1}
+  _autoFollowLeaderRangeGizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _showLeaderDetectionGizmo: 0
+  _showInteractableDetectionGizmo: 0
+  _interactableLayerMask:
     serializedVersion: 2
-    m_Bits: 256
-  _actorLayerMask:
-    serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 384
   _leaderObject: {fileID: 0}
   _nestObject: {fileID: 0}
   _currentState: 0
-  _currentTarget: {fileID: 0}
-  _targetPosition: {x: 0, y: 0, z: 0}
+  _currentTargetObject: {fileID: 0}
+  _currentTargetGroundPosition: {x: 0, y: 0, z: 0}
+  _isMovingToGroundPosition: 0
   _isTargetInRange: 0
   _distanceFromTarget: 0
-  _carriedObject: {fileID: 0}
+  _closeEnoughDistance: 0.5
+  _isCarryingObject: 0
   _pickupDuration: 0.1
+  _health: 6
+  _damage: 2
+  _atkCooldown: 0.5
+  _isAtkReady: 1
+  _atkCastRadius: 0.5
+  _atkCastOffset: {fileID: 439391620910589018}
+  _atkRangeGizmoColor: {r: 1, g: 0, b: 0, a: 1}
+  _showAtkRangeGizmo: 1
+  _atkAlignmentTolerance: 10
+  _alignmentRotationSpeed: 90
+  _showAtkAlignmentRays: 0
+  _atkAnimDuration: 0.5
+  _atkCastRelativeStartTime: 0.35
+  _atkCastDuration: 0.1
+  _isAttacking: 0
+  _damagedAnimResetDelay: 0.1
+  _invincTimeAfterHit: 0.1
+  _isInvincible: 0
 --- !u!195 &2838942970441888320
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -223,7 +248,7 @@ BoxCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 384
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -258,6 +283,59 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!95 &3776057667474881949
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3046112125697519415}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8804cb27346212649927160e05bc7423, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &5371226394474964654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 439391620910589018}
+  m_Layer: 7
+  m_Name: Attack Origin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &439391620910589018
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5371226394474964654}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 1.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8704960003732583193}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5658111208545914309
 GameObject:
   m_ObjectHideFlags: 0
@@ -293,6 +371,7 @@ Transform:
   - {fileID: 3944319591578894396}
   - {fileID: 4300669419961070567}
   - {fileID: 1616111291858600463}
+  - {fileID: 439391620910589018}
   m_Father: {fileID: 850978876430756736}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5017543295275089759

@@ -1,3 +1,6 @@
+using System.Collections;
+using Unity.Burst.Intrinsics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.GraphicsBuffer;
@@ -44,6 +47,12 @@ public interface ITargetable
     public void SetPickupState(bool state);
 
     public bool IsPickedUp();
+
+    public bool IsReadyForPickup();
+
+    public void TakeDamage(ITargetable aggressor, int damage);
+
+    public bool IsDead();
 }
 
 
@@ -54,15 +63,22 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Transform _carryParent;
     [SerializeField] private NavMeshAgent _selfAgent;
     [SerializeField] private Animator _headAnimator;
+    [SerializeField] private Animator _bodyAnimator;
 
     [Header("Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Minion;
     [SerializeField] private Faction _faction;
     [SerializeField] private float _interactionRange = .5f;
     [SerializeField] private int _nutrition = 34;
+    [SerializeField] private float _interactableDetectionRange = 4;
+    [Tooltip("The range in which an idle minion will choose follow the player if the minion has nothing to do")]
+    [SerializeField] private float _autoFollowLeaderRange = 1;
+    [SerializeField] private Color _interactableRangeGizmoColor = Color.white;
+    [SerializeField] private Color _autoFollowLeaderRangeGizmoColor = Color.yellow;
+    [SerializeField] private bool _showLeaderDetectionGizmo = false;
+    [SerializeField] private bool _showInteractableDetectionGizmo = false;
     private bool _isMoving = false;
-    [SerializeField] private LayerMask _pickupLayerMask;
-    [SerializeField] private LayerMask _actorLayerMask;
+    [SerializeField] private LayerMask _interactableLayerMask;
     [SerializeField] private GameObject _leaderObject;
     [SerializeField] private GameObject _nestObject;
 
@@ -71,14 +87,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private ActorState _currentState = ActorState.Idle;
     [SerializeField] private GameObject _currentTargetObject;
     private ITargetable _targetInterface;
-    private Vector3 _currentTargetGroundPosition;
-    private bool _isMovingToGroundPosition = false;
+    [SerializeField] private Vector3 _currentTargetGroundPosition;
+    [SerializeField] private bool _isMovingToGroundPosition = false;
     private Vector3 _targetPosition;
     [SerializeField] private bool _isTargetInRange = false;
     [SerializeField] private float _distanceFromTarget;
+    [SerializeField] private float _closeEnoughDistance = .5f;
     [SerializeField] private bool _isCarryingObject = false;
     private GameObject _carriedObject;
-    private bool _isHeadTilted = false;
+    private bool _isReadyToBePickedUp = false;
+    private bool _isDead = false;
 
     [Header("Carry Lerp Utils")]
     [SerializeField] private float _pickupDuration = .1f;
@@ -86,21 +104,432 @@ public class AiBehavior : MonoBehaviour, ITargetable
     private float _currentPickupLerpTime = 0;
     private bool _isLerpingPickup = false;
 
+    [Header("Combat Settings")]
+    [SerializeField] private int _health = 6;
+    [SerializeField] private int _damage = 2;
+    [SerializeField] private float _atkCooldown = .5f;
+    [SerializeField] private bool _isAtkReady = true;
+
+    [SerializeField] private float _atkCastRadius = 2;
+    [SerializeField] private Transform _atkCastOffset;
+    [SerializeField] private Color _atkRangeGizmoColor = Color.red;
+    [SerializeField] private bool _showAtkRangeGizmo = false;
+    [Tooltip("How much tolerance does this minion have when turning to face a target. 0 means no tolerance. 180 means 'I don't need to see you to hit you'")]
+    [SerializeField] [Range(0,180)] private float _atkAlignmentTolerance = 10;
+    [SerializeField] private float _alignmentRotationSpeed = 90;
+    [SerializeField] private bool _showAtkAlignmentRays = false;
+
+    private IEnumerator _atkSequence = null;
+    [SerializeField] private float _atkAnimDuration;
+    [SerializeField] [Range(0,1)] private float _atkCastRelativeStartTime;
+    [SerializeField] private float _atkCastDuration = .2f;
+    private float _atkCastStartTime;
+    private float _remainingAtkTime;
+    [SerializeField] private bool _isAttacking = false;
+    private bool _isCastingAttack = false;
+    private bool _isAtkCoolingDown = false;
+    [SerializeField] private float _damagedAnimResetDelay = .1f;
+    [SerializeField] private float _invincTimeAfterHit = .1f;
+    [SerializeField] private bool _isInvincible = false;
+
+
+
 
 
 
     //Monobehaviours
     private void Update()
     {
-        ManagePickupLerp();
-        ValidateTargetingReferences();
-        PursueTargetIfTargetAvailable();
+        if (!_isDead)
+        {
+            ManagePickupLerp();
+            WatchSurroundings();
+            ValidateTargetingReferences();
+            if (!_isAttacking)
+                PursueTargetIfTargetAvailable();
+            CastAttack();
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        DrawRangeGizmos();
+    }
+
+
+    //Internals
+    private void AlignAttack()
+    {
+        //is our target valid (and we aren't already committed to an attack)
+        if (_currentTargetObject != null && !_isAttacking)
+        {
+            //Calculate the direction towards the target
+            Vector3 targetDirection = _currentTargetObject.transform.position - transform.position;
+
+            //Normalize the direction
+            Vector3 normalizedDirectionTowardsTarget = targetDirection.normalized;
+
+            //calculate our forwards direction (in world space)
+            Vector3 forwardsDirection = transform.TransformVector(Vector3.forward);
+
+            //Draw the alignment vectors used in our calculations, if needed
+            if (_showAtkAlignmentRays)
+            {
+                Debug.DrawRay(transform.position, forwardsDirection * 5, Color.red);
+                Debug.DrawRay(transform.position, normalizedDirectionTowardsTarget * 5, Color.yellow);
+                
+            }
+
+            //calculate the angle between our forwards and the normalizedTargetDirection
+            float angleDifference = Vector3.SignedAngle(forwardsDirection, normalizedDirectionTowardsTarget,Vector3.up);
+            
+            //Log the angular difference, if needed
+            //Debug.Log($"angle difference: {angleDifference}");
+            
+            //is the target within a tolerable alignment
+            if (-_atkAlignmentTolerance <= angleDifference && angleDifference <= _atkAlignmentTolerance)
+                EnterAttack();
+
+            //we aren't properly aligned to the target
+            else
+            {
+                //calculate the additive rotation. we're rotating on the y axis in the direction of the angular difference's sign
+                Vector3 additiveRotation =  Mathf.Sign(angleDifference) * Vector3.up * _alignmentRotationSpeed * Time.deltaTime;
+
+                //Apply the rotation
+                transform.eulerAngles += additiveRotation;
+            }
+            
+
+
+
+        }
+    }
+
+    private void ReadyAtk()
+    {
+        _isAtkCoolingDown = false;
+        _isAtkReady = true;
+    }
+
+    private void CooldownAtk()
+    {
+        if (!_isAtkCoolingDown)
+        {
+            _isAtkCoolingDown = true;
+            Invoke(nameof(ReadyAtk), _atkCooldown);
+        }
+    }
+
+    private void CastAttack()
+    {
+        //if we're in the cast state
+        if (_isCastingAttack)
+        {
+            //Did our target vanish?
+            if (_currentTargetObject == null)
+            {
+                //cancel any timers that're counting the duration of our cast
+                CancelInvoke(nameof(EndAttackCast));
+
+                //end the attack cast now
+                EndAttackCast();
+                return;
+            }
+
+            //Cast over the detection area
+            Collider[] detections = Physics.OverlapSphere(_atkCastOffset.position, _atkCastRadius, _interactableLayerMask);
+
+            //Attempt to find our target amongst any detections
+            foreach (Collider detection in detections)
+            {
+                //has our target been detected?
+                if (detection.gameObject == _currentTargetObject)
+                {
+                    //Damage the target
+                    _targetInterface.TakeDamage(this, _damage);
+
+                    //cancel any timers that're counting the duration of this cast
+                    CancelInvoke(nameof(EndAttackCast));
+
+                    //End the cast, the target has been hit
+                    EndAttackCast();
+                    return;
+                }
+            }
+        }
+    }
+
+    private void EndAttackCast()
+    {
+        _isCastingAttack = false;
+    }
+
+    private void EnterAttack()
+    {
+        //are we NOT already attacking?
+        if (_atkSequence == null && _isAtkReady)
+        {
+            //Set the atk reference
+            _atkSequence = ManageAttackSequence();
+
+            //calculate the relative atkCast time
+            _atkCastStartTime = _atkAnimDuration * _atkCastRelativeStartTime;
+
+            //calculate the remainder atk time
+            _remainingAtkTime = _atkAnimDuration - _atkCastStartTime;
+
+            //start the sequence
+            StartCoroutine(_atkSequence);
+        }
+    }
+
+    private void CancelAttack()
+    {
+        //are we currently in our attack sequence?
+        if (_atkSequence != null)
+        {
+            //stop the sequence timer
+            StopCoroutine(_atkSequence);
+
+            //Clear the reference
+            _atkSequence = null;
+
+            //leave the atk state
+            _isAttacking = false;
+
+            //stop casting any attacks, if they exist
+            CancelInvoke(nameof(CancelAttack));
+            EndAttackCast();
+
+            //update the animator that we aren't attacking anymore
+            _bodyAnimator.SetBool("isAttacking", false);
+
+            //Cooldown the attack, if it isn't cooling down already
+            CooldownAtk();
+        }
+    }
+
+    private IEnumerator ManageAttackSequence()
+    {
+        //enter the atk state
+        _isAttacking = true;
+
+        //reest the atk ready state
+        _isAtkReady = false;
+
+        //enter the proper animation
+        _bodyAnimator.SetBool("isAttacking", true);
+
+        //wait for the atkCast time
+        yield return new WaitForSeconds(_atkCastStartTime);
+
+        //Cast the atk
+        _isCastingAttack = true;
+        Invoke(nameof(EndAttackCast), _atkCastDuration);
+
+        //wait for the remainder of the sequence
+        yield return new WaitForSeconds(_remainingAtkTime);
+
+        //exit the atk state
+        _isAttacking = false;
+
+        //clear our reference
+        _atkSequence = null;
+
+        //Exit the attack animation
+        _bodyAnimator.SetBool("isAttacking", false);
+
+        //Cooldown the atk
+        CooldownAtk();
     }
 
 
 
+    private void DrawRangeGizmos()
+    {
+        if (_showLeaderDetectionGizmo)
+        {
+            Gizmos.color = _autoFollowLeaderRangeGizmoColor;
+            Gizmos.DrawWireSphere(transform.position, _autoFollowLeaderRange);
+        }
 
-    //Internals
+        if (_showInteractableDetectionGizmo)
+        {
+            Gizmos.color = _interactableRangeGizmoColor;
+            Gizmos.DrawWireSphere(transform.position, _interactableDetectionRange);
+        }
+
+        if (_showAtkRangeGizmo)
+        {
+            Gizmos.color = _atkRangeGizmoColor;
+            Gizmos.DrawWireSphere(_atkCastOffset.position, _atkCastRadius);
+        }
+    }
+
+    private void WatchSurroundings()
+    {
+        //are we idling and NOT following a move order
+        if (_currentState == ActorState.Idle && !_isMovingToGroundPosition)
+            DetectAnything();
+
+        //otherwise, are idly moving towards a move order
+        else if (_currentState == ActorState.Idle && !_isMovingToGroundPosition)
+            DetectHostilesOnly();
+    }
+
+    private void DetectAnything()
+    {
+        //detect anything within range
+        Collider[] detectedColliders = Physics.OverlapSphere(transform.position, _interactableDetectionRange, _interactableLayerMask);
+
+        //Detect hostiles first
+        GameObject closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Minion);
+
+        //if we've found an enemy, attack it
+        if (closestInteractableObject != null)
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
+
+
+        //Detect pickups
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Pickup);
+
+        // if anything was found, go after it
+        if ( closestInteractableObject != null )
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
+
+
+        //Detect the player
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Player);
+
+        //if the player was detected
+        if ( closestInteractableObject != null)
+        {
+            //attack the player if it isn't on our side
+            if (closestInteractableObject.GetComponent<ITargetable>().GetFaction() != _faction)
+            {
+                SetTarget(closestInteractableObject);
+                return;
+            }
+
+            //player is friendly. 
+            else 
+            {
+                //calculate the player's distance
+                float playerDistance = (closestInteractableObject.transform.position - transform.position).magnitude;
+
+                //Are they within autoFollowRange?
+                if (playerDistance <= _autoFollowLeaderRange)
+                {
+                    SetTarget(closestInteractableObject);
+
+                    //dont forget to add this minion as a follower!
+                    closestInteractableObject.GetComponent<PlayerBehavior>().AddFollower(this);
+
+                    return;
+                }
+            }
+        }
+
+    }
+
+    private void DetectHostilesOnly()
+    {
+        //detect anything within range
+        Collider[] detectedColliders = Physics.OverlapSphere(transform.position, _interactableDetectionRange, _interactableLayerMask);
+
+        //Detect hostiles first
+        GameObject closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Minion);
+
+        //if we've found an enemy, attack it
+        if (closestInteractableObject != null)
+        {
+            SetTarget(closestInteractableObject);
+            return;
+        }
+
+        //Detect the player last, in case it's hostile
+        closestInteractableObject = FindClosestDetection(detectedColliders, InteractableType.Player);
+
+        //if the player was detected
+        if (closestInteractableObject != null)
+        {
+            //attack the player if it isn't on our side
+            if (closestInteractableObject.GetComponent<ITargetable>().GetFaction() != _faction)
+            {
+                SetTarget(closestInteractableObject);
+                return;
+            }
+        }
+    }
+
+    private GameObject FindClosestDetection(Collider[] detections,InteractableType preferredType)
+    {
+        GameObject closestDetection = null;
+        float closestDistanceSqrt = 0;
+
+        foreach (Collider detection in detections)
+        {
+            //attempt to get the detection's behavior
+            ITargetable behavior = detection.GetComponent<ITargetable>();
+
+            if (behavior != null)
+            {
+                //make sure this object matches our preferred interactable type
+                if (preferredType == behavior.GetInteractableType())
+                {
+                    //special pickup cases to watch out for: 
+                    if (preferredType == InteractableType.Pickup)
+                    {
+                        //IGNORE any pickup within range that're already being carried away
+                        if (behavior.IsPickedUp())
+                            continue;
+
+                        //IGNORE any pickups that aren't ready to be picked up
+                        if (!behavior.IsReadyForPickup())
+                            continue;
+                    }
+
+                    //special case: if we're detecting minions, ignore friendlies
+                    if (preferredType == InteractableType.Minion && behavior.GetFaction() == _faction)
+                        continue;
+
+                    //Do we have no previous valid detection?
+                    if (closestDetection == null)
+                    {
+                        //this one is the closest by default
+                        closestDetection = detection.gameObject;
+
+                        //save the closest distance sqrt (the length of the magnitude^2-- always positive)
+                        closestDistanceSqrt = (detection.transform.position - transform.position).sqrMagnitude;
+                    }
+
+                    else
+                    {
+                        //detect this object's distance Sqrt
+                        float currentDistanceSqrt = (detection.transform.position - transform.position).sqrMagnitude;
+
+                        //save this detection if it's closer than our previous one
+                        if (currentDistanceSqrt < closestDistanceSqrt)
+                        {
+                            closestDetection = detection.gameObject;
+                            closestDistanceSqrt = currentDistanceSqrt;
+                        }
+                    }
+                }
+            }
+        }
+
+        //return anything we've found (null if nothing was found)
+        return closestDetection;
+    }
+
     private void SetTarget(GameObject target)
     {
         if (_isMovingToGroundPosition)
@@ -119,7 +548,11 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
         //drop what you're doing if we're being re-tasked
         if (_isCarryingObject && _currentState != ActorState.Collect)
-            DropObject();
+            DropObjectIfCarrying();
+
+        //exit the moving anim
+        if (_isMoving)
+            _bodyAnimator.SetBool("isMoving", false);
 
         //reset movement utils
         _isMoving = false;
@@ -165,13 +598,17 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void ValidateTargetingReferences()
     {
-        //did the target vanitsh?
-        if (_currentTargetObject == null)
+        //Did a target object vanish while we were following it (ignore if we were only moving to a ground position)
+        if (_currentTargetObject == null && _isMovingToGroundPosition == false)
             SetTarget(null);
 
 
-        else
+        else if (_isMovingToGroundPosition == false && _currentTargetObject != null)
         {
+            //Did we suddenly lose our behavior reference?
+            if (_targetInterface == null || _currentTargetObject == null)
+                SetTarget(null);
+
             //are we pursuing an object that is already picked up?
             if (_targetInterface.GetInteractableType() == InteractableType.Pickup && 
                 _targetInterface.IsPickedUp())
@@ -188,7 +625,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             //are we carrying a pickup but lost our nest reference
             if (_isCarryingObject && _nestObject == null)
             {
-                DropObject();
+                DropObjectIfCarrying();
                 Debug.LogWarning("Nest reference is missing while minion sought to drop off an item");
             }
         }
@@ -220,10 +657,24 @@ public class AiBehavior : MonoBehaviour, ITargetable
                 _selfAgent.SetDestination(_targetPosition);
                 _selfAgent.isStopped = false;
 
+                //apply the moving animation
+                _bodyAnimator.SetBool("isMoving", true);
                 _isMoving = true;
 
             }
         }
+    }
+
+    private void EnterInvincAfterHit()
+    {
+        _isInvincible = true;
+
+        Invoke(nameof(ExitInvinc), _invincTimeAfterHit);
+    }
+
+    private void ExitInvinc()
+    {
+        _isInvincible = false;
     }
 
     private void InteractWithCurrentTarget()
@@ -237,6 +688,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
                 _selfAgent.isStopped = true;
 
                 _isMoving = false;
+                _bodyAnimator.SetBool("isMoving", false);
             }
             
 
@@ -245,7 +697,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
             {
                 case ActorState.Idle:
                     //chill
-                    _currentTargetObject = null;
                     break;
 
                 case ActorState.Follow:
@@ -256,11 +707,21 @@ public class AiBehavior : MonoBehaviour, ITargetable
                     //if the target is a pickup?
                     if (_targetInterface.GetInteractableType() == InteractableType.Pickup)
                     {
-                        //pickup the thing
-                        PickupObject(_currentTargetObject);
+                        //is the object available for pickup?
+                        if (_targetInterface.IsReadyForPickup())
+                        {
+                            //pickup the thing
+                            PickupObject(_currentTargetObject);
 
-                        //Set the nest as the target
-                        SetTarget(_nestObject);
+                            //Set the nest as the new target
+                            SetTarget(_nestObject);
+                        }
+                        
+                        else
+                        {
+                            //just forget the target. Nothing more you can do
+                            SetTarget(null);
+                        }
                     }
 
 
@@ -268,15 +729,24 @@ public class AiBehavior : MonoBehaviour, ITargetable
                     else if (_targetInterface.GetInteractableType() == InteractableType.Nest)
                     {
                         //Drop Pickup
-                        DropObject();
+                        DropObjectIfCarrying();
 
-                        //enter the Idle
-                        _currentState = ActorState.Idle;
+                        //You're at the nest. chill
+                        SetTarget(null);
                     }
                     break;
 
                 case ActorState.Fight:
-                    //enable the fight logic
+                    //is the target dead?
+                    if (_targetInterface.IsDead())
+                        SetTarget(null);
+
+                    else
+                    {
+                        //Face the target, and then Attack it!
+                        AlignAttack();
+                    }
+
                     break;
 
             }
@@ -290,9 +760,11 @@ public class AiBehavior : MonoBehaviour, ITargetable
         if ( _isLerpingPickup)
         {
             _currentPickupLerpTime += Time.deltaTime;
-            _carriedObject.transform.localPosition = Vector3.Lerp(_pickupObjectPosition, _carryParent.localPosition, _currentPickupLerpTime / _pickupDuration);
 
-            if (_currentPickupLerpTime >= _pickupDuration)
+            if (_carriedObject != null)
+                _carriedObject.transform.localPosition = Vector3.Lerp(_pickupObjectPosition, _carryParent.localPosition, _currentPickupLerpTime / _pickupDuration);
+
+            if (_currentPickupLerpTime >= _pickupDuration || _carriedObject == null)
             {
                 _isLerpingPickup = false;
                 _currentPickupLerpTime = 0;
@@ -309,12 +781,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
             ApproachTheCurrentTarget();
             InteractWithCurrentTarget();
         }
-        else
-        {
-            _isMoving = false;
-            _currentState = ActorState.Idle;
-            _isTargetInRange = false;
-        }
+        else if (_isMovingToGroundPosition != false)
+            UpdateMovingToGroundPositionState();
     }
 
 
@@ -342,7 +810,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
         }
     }
 
-    private void DropObject()
+    private void DropObjectIfCarrying()
     {
         if (_carriedObject != null)
         {
@@ -364,6 +832,44 @@ public class AiBehavior : MonoBehaviour, ITargetable
         }
     }
 
+    private void UpdateMovingToGroundPositionState()
+    {
+        //have we arrived at our target location?
+        if ( _isMovingToGroundPosition)
+        {
+            //calculate the distance from our target
+            _distanceFromTarget = Mathf.Abs((_currentTargetGroundPosition - transform.position).magnitude);
+
+            //are we close enough to our target position?
+            if (_distanceFromTarget <= _closeEnoughDistance)
+            {
+                //update our move states
+                _isMovingToGroundPosition = false;
+                _isMoving = false;
+
+                //exit the moving anim
+                _bodyAnimator.SetBool("isMoving", false);
+            }
+            
+
+        }
+    }
+
+    private void Die()
+    {
+        _isDead = true;
+        _interactableType = InteractableType.Pickup;
+
+        //Set animator state to isDead
+        _bodyAnimator.SetBool("isDead", true);
+
+        //throw the body around a bit ^_^
+        //...
+
+        //remove ourself from the leader's followers
+        if (_leaderObject != null)
+            _leaderObject.GetComponent<PlayerBehavior>().RemoveFollower(this);
+    }
 
 
 
@@ -375,11 +881,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     public void SetPursuitTarget(ITargetable target)
     {
-        //is the target not null and NOT OURSELF
-        if (target != null && target.GetBehaviorID() != GetInstanceID())
+        //is the target NOT OURSELF
+        if (target.GetBehaviorID() != GetInstanceID())
             SetTarget(target.GetGameObject());
-        else
-            SetTarget(null);
     }
 
     public int GetBehaviorID()
@@ -412,7 +916,14 @@ public class AiBehavior : MonoBehaviour, ITargetable
         //clear the current targeting data
         if (_currentTargetObject != null)
             SetTarget(null);
-            
+
+        //set the moving to ground position state
+        _isMovingToGroundPosition = true;
+        _currentTargetGroundPosition = new Vector3(position.x, transform.position.y, position.z);
+
+        //set the move animation
+        _bodyAnimator.SetBool("isMoving", true);
+
         //Simply move to the destination
         _isMoving = true;
         _selfAgent.isStopped = false;
@@ -427,6 +938,61 @@ public class AiBehavior : MonoBehaviour, ITargetable
     public bool IsPickedUp()
     {
         return false;
+    }
+
+    public bool IsReadyForPickup()
+    {
+        return _isReadyToBePickedUp;
+    }
+
+    public void TakeDamage(ITargetable aggressor, int damage)
+    {
+        if (_currentState != ActorState.Fight)
+        {
+            //Drop everything
+            DropObjectIfCarrying();
+
+            //target our attacker. We'll enter the fight state if our aggressor isn't friendly
+            SetTarget(aggressor.GetGameObject());
+        }
+
+        //interrupt any attacks
+        if (_isAttacking)
+            CancelAttack();
+
+        //take the damage
+        _health -= damage;
+
+        //animate the hit
+        _bodyAnimator.SetBool("isDamaged", true);
+
+        //reset the damaged anim (staying away from animation triggers ^_^)
+        Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
+
+        //Die if we ded
+        if (_health <= 0)
+        {
+            Die();
+            return;
+        }
+            
+
+        else
+        {
+            //enter invinc to avoid too-frequent frame-after-frame hits
+            EnterInvincAfterHit();
+        }
+
+    }
+
+    private void ResetDamagedAnimation()
+    {
+        _bodyAnimator.SetBool("isDamaged", false);
+    }
+
+    public bool IsDead()
+    {
+        return _isDead;
     }
 
     //Debugging

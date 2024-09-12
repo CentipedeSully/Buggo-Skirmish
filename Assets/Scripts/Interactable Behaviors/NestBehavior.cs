@@ -17,6 +17,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Faction _faction = Faction.Ally;
     [SerializeField] private GameObject _playerObject;
     [SerializeField] private Transform _minionSpawnPosition;
+    private bool _isDead;
 
 
 
@@ -120,5 +121,21 @@ public class NestBehavior : MonoBehaviour, ITargetable
     public bool IsPickedUp()
     {
         return false;
+    }
+
+    public bool IsReadyForPickup()
+    {
+        return false;
+    }
+
+    public void TakeDamage(ITargetable aggressor, int damage)
+    {
+        //take damage
+        //...
+    }
+
+    public bool IsDead()
+    {
+        return _isDead;
     }
 }

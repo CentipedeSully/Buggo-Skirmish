@@ -155,6 +155,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _nutrition: 100
+  _isBeingCarried: 0
+  _isReadyToBePickedUp: 1
+  _pickupCooldown: 0.5
+  _isGravityEnabled: 0
+  _gravityResetTime: 2
 --- !u!54 &3149037871196682663
 Rigidbody:
   m_ObjectHideFlags: 0

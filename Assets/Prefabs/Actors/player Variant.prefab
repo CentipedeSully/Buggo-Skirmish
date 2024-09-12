@@ -17,6 +17,10 @@ PrefabInstance:
       value: 112
       objectReference: {fileID: 0}
     - target: {fileID: 2838942970441888320, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: avoidancePriority
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2838942970441888320, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: m_StoppingDistance
       value: 0.5
       objectReference: {fileID: 0}
@@ -102,6 +106,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 850978876430756736, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
   m_PrefabInstance: {fileID: 6843064638547522809}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &7678693961238808932 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 3776057667474881949, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+  m_PrefabInstance: {fileID: 6843064638547522809}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8408930645025004494 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3046112125697519415, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
@@ -133,3 +142,7 @@ MonoBehaviour:
   _moveDirectionGizmoColor: {r: 0, g: 1, b: 1, a: 1}
   _gizmoLineLength: 5
   _activeFollowers: []
+  _bodyAnimator: {fileID: 7678693961238808932}
+  _damagedAnimResetDelay: 0.1
+  _isInvincible: 0
+  _invincTimeAfterHit: 0.1

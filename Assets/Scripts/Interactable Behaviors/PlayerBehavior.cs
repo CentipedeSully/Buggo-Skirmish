@@ -48,11 +48,23 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _gizmoLineLength = 5;
 
     [SerializeField] private List<AiBehavior> _activeFollowers;
+    private bool _isDead;
+
+    [SerializeField] private Animator _bodyAnimator;
+    [SerializeField] private float _damagedAnimResetDelay = .1f;
+    [SerializeField] private bool _isInvincible = false;
+    [SerializeField] private float _invincTimeAfterHit = .1f;
+
+
+
 
 
     //Monobehaviours
     private void Start()
     {
+        //make the player ignore the idel and move anims (they break, currently when the player turns)
+        _bodyAnimator.SetBool("isPlayer", true);
+
         //defualt the _currentLookAtDirection
         _currentLookAtVector = transform.position + transform.TransformDirection(Vector3.forward);
 
@@ -75,7 +87,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     }
 
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         DrawSignalRadiusGizmo();
         DrawMoveDirectionGizmo();
@@ -139,6 +151,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     {
         if (_moveInput != Vector2.zero)
         {
+
             //create the raw move vector
             Vector3 moveVector = new Vector3(_moveInput.x, 0, _moveInput.y);
 
@@ -223,7 +236,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
                         aiBehavior.SetPursuitTarget(this);
 
                         //add this follower as a follower
-                        AddMinionAsFollower(aiBehavior);
+                        AddMinionToFollowerList(aiBehavior);
                     }
                 }
             }
@@ -264,7 +277,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
                 minion.SetPursuitTarget(this);
 
                 //add this follower to the list
-                AddMinionAsFollower(minion);
+                AddMinionToFollowerList(minion);
             }
 
             //It isn't an ally...
@@ -303,11 +316,27 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
         }
     }
 
-    private void AddMinionAsFollower(AiBehavior minionBehavior)
+    private void AddMinionToFollowerList(AiBehavior minionBehavior)
     {
         if (!_activeFollowers.Contains(minionBehavior))
             _activeFollowers.Add(minionBehavior);
     }
+
+    private void ResetDamagedAnimation()
+    {
+        _bodyAnimator.SetBool("isDamaged", false);
+    }
+
+    private void EnterInvincAfterHit()
+    {
+        _isInvincible = true;
+
+        Invoke(nameof(ExitInvinc), _invincTimeAfterHit);
+    }
+
+    private void ExitInvinc() { _isInvincible = false; }
+
+
 
 
     //Externals
@@ -346,7 +375,50 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
         return false;
     }
 
+    public void AddFollower(AiBehavior newMinion)
+    {
+        if (newMinion != null)
+        {
+            if (newMinion.GetFaction() == GetFaction())
+                AddMinionToFollowerList(newMinion);
+        }
+        
+    }
 
+    public bool IsMinionAlreadyFollowing(AiBehavior minion)
+    {
+        return _activeFollowers.Contains(minion);
+    }
+
+    public bool IsReadyForPickup()
+    {
+        return false;
+    }
+
+    public void TakeDamage(ITargetable aggressor, int damage)
+    {
+        //Take damage
+        _bodyAnimator.SetBool("isDamaged", true);
+
+        //reset the damaged anim (staying away from animation triggers ^_^)
+        Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
+
+        //enter invinc to avoid too-frequent frame-after-frame hits
+        EnterInvincAfterHit();
+    }
+
+
+
+    public bool IsDead()
+    {
+        return _isDead;
+    }
+
+    public void RemoveFollower(AiBehavior minion)
+    {
+        if (IsMinionAlreadyFollowing(minion))
+            _activeFollowers.Remove(minion);
+    }
 
 
 

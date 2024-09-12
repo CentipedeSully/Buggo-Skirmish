@@ -5,6 +5,8 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     //Declarations
     [SerializeField] private int _nutrition = 100;
     [SerializeField] private bool _isBeingCarried = false;
+    [SerializeField] private bool _isReadyToBePickedUp = true;
+    [SerializeField] private float _pickupCooldown = .5f;
     [SerializeField] private bool _isGravityEnabled = false;
     [Tooltip("How long a pickup will wait before removing itself from gravity after being dropped")]
     [SerializeField] private float _gravityResetTime = 2f;
@@ -43,6 +45,11 @@ public class PickupBehavior : MonoBehaviour, ITargetable
             //start counting down before gravity is stopped
             Invoke(nameof(DisableGravity), _gravityResetTime);
         }
+    }
+
+    private void ReadyPickup()
+    {
+        _isReadyToBePickedUp = true;
     }
 
 
@@ -86,12 +93,30 @@ public class PickupBehavior : MonoBehaviour, ITargetable
 
         //make sure to enable gravity when being dropped
         else if (!_isBeingCarried)
+        {
             TemporarilyEnableGravity();
+
+            //cooldown the pickup, so it doen't get juggled each frame by ai
+            _isReadyToBePickedUp = false;
+            Invoke(nameof(ReadyPickup),_pickupCooldown);
+        }
+            
     }
 
     public bool IsPickedUp() { return _isBeingCarried; }
 
+    public bool IsReadyForPickup()
+    {
+        return _isReadyToBePickedUp;
+    }
 
+    public void TakeDamage(ITargetable aggressor, int damage)
+    {
+        return;
+    }
 
-
+    public bool IsDead()
+    {
+        return false;
+    }
 }
