@@ -54,6 +54,8 @@ public interface ITargetable
     public void TakeDamage(ITargetable aggressor, int damage);
 
     public bool IsDead();
+
+    public int GetHealth();
 }
 
 
@@ -384,7 +386,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             DetectAnything();
 
         //otherwise, are idly moving towards a move order
-        else if (_currentState == ActorState.Idle && !_isMovingToGroundPosition)
+        else if (_currentState == ActorState.Idle && _isMovingToGroundPosition)
             DetectHostilesOnly();
     }
 
@@ -946,7 +948,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     public void SetPursuitTarget(ITargetable target)
     {
         //is the target NOT OURSELF
-        if (target.GetBehaviorID() != GetInstanceID())
+        if (target.GetBehaviorID() != GetInstanceID() && _isDead == false)
             SetTarget(target.GetGameObject());
     }
 
@@ -972,21 +974,23 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     public void MoveToPosition(Vector3 position)
     {
-        //clear the current targeting data
-        if (_currentTargetObject != null)
+        if (!_isDead)
+        {
+            //clear the current targeting data
             SetTarget(null);
 
-        //set the moving to ground position state
-        _isMovingToGroundPosition = true;
-        _currentTargetGroundPosition = new Vector3(position.x, transform.position.y, position.z);
+            //set the moving to ground position state
+            _isMovingToGroundPosition = true;
+            _currentTargetGroundPosition = new Vector3(position.x, transform.position.y, position.z);
 
-        //set the move animation
-        _bodyAnimator.SetBool("isMoving", true);
+            //set the move animation
+            _bodyAnimator.SetBool("isMoving", true);
 
-        //Simply move to the destination
-        _isMoving = true;
-        _selfAgent.isStopped = false;
-        _selfAgent.SetDestination(position);
+            //Simply move to the destination
+            _isMoving = true;
+            _selfAgent.isStopped = false;
+            _selfAgent.SetDestination(position);
+        }
     }
 
     public void SetNest(GameObject nest)
@@ -1006,41 +1010,43 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     public void TakeDamage(ITargetable aggressor, int damage)
     {
-        if (_currentState != ActorState.Fight)
+        if (!_isDead && !_isInvincible)
         {
-            //Drop everything
-            DropObjectIfCarrying();
+            if (_currentState != ActorState.Fight)
+            {
+                //Drop everything
+                DropObjectIfCarrying();
 
-            //target our attacker. We'll enter the fight state if our aggressor isn't friendly
-            SetTarget(aggressor.GetGameObject());
+                //target our attacker. We'll enter the fight state if our aggressor isn't friendly
+                SetTarget(aggressor.GetGameObject());
+            }
+
+            //interrupt any attacks
+            if (_isAttacking)
+                CancelAttack();
+
+            //take the damage
+            _health -= damage;
+
+            //animate the hit
+            _bodyAnimator.SetBool("isDamaged", true);
+
+            //reset the damaged anim (staying away from animation triggers ^_^)
+            Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
+
+            //Die if we ded
+            if (_health <= 0)
+            {
+                Die();
+                return;
+            }
+            else
+            {
+                //enter invinc to avoid too-frequent frame-after-frame hits
+                EnterInvincAfterHit();
+            }
         }
-
-        //interrupt any attacks
-        if (_isAttacking)
-            CancelAttack();
-
-        //take the damage
-        _health -= damage;
-
-        //animate the hit
-        _bodyAnimator.SetBool("isDamaged", true);
-
-        //reset the damaged anim (staying away from animation triggers ^_^)
-        Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
-
-        //Die if we ded
-        if (_health <= 0)
-        {
-            Die();
-            return;
-        }
-            
-
-        else
-        {
-            //enter invinc to avoid too-frequent frame-after-frame hits
-            EnterInvincAfterHit();
-        }
+        
 
     }
 
@@ -1074,6 +1080,11 @@ public class AiBehavior : MonoBehaviour, ITargetable
                 Invoke(nameof(ReadyPickup), _pickupCooldown);
             }
         }
+    }
+
+    public int GetHealth()
+    {
+        return _health;
     }
 
     //Debugging

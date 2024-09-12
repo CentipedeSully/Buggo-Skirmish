@@ -106,6 +106,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 850978876430756736, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
   m_PrefabInstance: {fileID: 6843064638547522809}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &6184100191302117244 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 803089149892858757, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+  m_PrefabInstance: {fileID: 6843064638547522809}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &7678693961238808932 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 3776057667474881949, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
@@ -133,6 +138,7 @@ MonoBehaviour:
   _playerInputReference: {fileID: 0}
   _playerManipulator: {fileID: 0}
   _bodyModelTransform: {fileID: 6140723855698517881}
+  _rb: {fileID: 6184100191302117244}
   _moveSpeed: 3
   _cameraRotationSpeed: 270
   _signalRadius: 10
@@ -142,7 +148,11 @@ MonoBehaviour:
   _moveDirectionGizmoColor: {r: 0, g: 1, b: 1, a: 1}
   _gizmoLineLength: 5
   _activeFollowers: []
+  _health: 6
   _bodyAnimator: {fileID: 7678693961238808932}
   _damagedAnimResetDelay: 0.1
   _isInvincible: 0
   _invincTimeAfterHit: 0.1
+  _deathThrowForce: 700
+  _deathThrowTorqueMax: 600
+  _deathThrowTorqueMin: 300

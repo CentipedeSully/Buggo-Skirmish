@@ -16,6 +16,8 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private PlayerInput _playerInputReference;
     [SerializeField] private PlayerManipulator _playerManipulator;
     [SerializeField] private Transform _bodyModelTransform;
+    [SerializeField] private Rigidbody _rb;
+
     private InputAction _moveInputAction;
     private InputAction _callUnitsInputAction;
     private InputAction _mouseMovementInputAction;
@@ -48,12 +50,17 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _gizmoLineLength = 5;
 
     [SerializeField] private List<AiBehavior> _activeFollowers;
+    [SerializeField] private int _health;
     private bool _isDead;
 
     [SerializeField] private Animator _bodyAnimator;
     [SerializeField] private float _damagedAnimResetDelay = .1f;
     [SerializeField] private bool _isInvincible = false;
     [SerializeField] private float _invincTimeAfterHit = .1f;
+    [SerializeField] private float _deathThrowForce = 700;
+    [SerializeField] private float _deathThrowTorqueMax = 600;
+    [SerializeField] private float _deathThrowTorqueMin = 300;
+    
 
 
 
@@ -79,11 +86,15 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     private void Update()
     {
         ReadInput();
-        MovePlayer();
-        LerpBodyRotationTowardsLookAtPosition();
-        
         TurnCamera();
-        CallNearbyUnits();
+
+        if (!_isDead)
+        {
+
+            MovePlayer();
+            LerpBodyRotationTowardsLookAtPosition();
+            CallNearbyUnits();
+        }
     }
 
 
@@ -117,7 +128,8 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
         //Lclick
         if (_mouseLclickInputAction.WasPressedThisFrame())
-            GiveCommandViaManipulatorContext();
+            if (!_isDead)
+                GiveCommandViaManipulatorContext();
 
         
     }
@@ -336,6 +348,30 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
     private void ExitInvinc() { _isInvincible = false; }
 
+    private void Die()
+    {
+        _isDead = true;
+
+        //disable the navmesh agent
+        GetComponent<NavMeshAgent>().enabled = false;
+
+        //remove the player's rotation contraints
+        _rb.constraints = RigidbodyConstraints.None;
+
+        //enable gravity
+        _rb.useGravity = true;
+
+        //Unparent the camera
+        _cameraParent.SetParent(null);
+
+        //generate the throw forces
+        float xRandom = UnityEngine.Random.Range(-1, 1);
+        float yRandom = UnityEngine.Random.Range(-1, 1);
+        float zRandom = UnityEngine.Random.Range(-1, 1);
+        _rb.AddForce(Vector3.up * _deathThrowForce, ForceMode.Impulse);
+        _rb.AddTorque(new Vector3(xRandom, yRandom, zRandom) * UnityEngine.Random.Range(_deathThrowTorqueMin, _deathThrowTorqueMax), ForceMode.Impulse);
+    }
+
 
 
 
@@ -397,14 +433,23 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
     public void TakeDamage(ITargetable aggressor, int damage)
     {
-        //Take damage
-        _bodyAnimator.SetBool("isDamaged", true);
+        if (!_isInvincible)
+        {
+            _health -= damage;
 
-        //reset the damaged anim (staying away from animation triggers ^_^)
-        Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
+            //Take damage
+            _bodyAnimator.SetBool("isDamaged", true);
 
-        //enter invinc to avoid too-frequent frame-after-frame hits
-        EnterInvincAfterHit();
+            //reset the damaged anim (staying away from animation triggers ^_^)
+            Invoke(nameof(ResetDamagedAnimation), _damagedAnimResetDelay);
+
+
+            if (_health <= 0)
+                Die();
+
+            //enter invinc to avoid too-frequent frame-after-frame hits
+            EnterInvincAfterHit();
+        }
     }
 
 
@@ -418,6 +463,11 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     {
         if (IsMinionAlreadyFollowing(minion))
             _activeFollowers.Remove(minion);
+    }
+
+    public int GetHealth()
+    {
+        return _health;
     }
 
 

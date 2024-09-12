@@ -119,4 +119,9 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     {
         return false;
     }
+
+    public int GetHealth()
+    {
+        return -1;
+    }
 }

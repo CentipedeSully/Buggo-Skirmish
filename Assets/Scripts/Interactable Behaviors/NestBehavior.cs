@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 
 
@@ -17,6 +18,7 @@ public class NestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Faction _faction = Faction.Ally;
     [SerializeField] private GameObject _playerObject;
     [SerializeField] private Transform _minionSpawnPosition;
+    [SerializeField] private int _health = 60;
     private bool _isDead;
 
 
@@ -25,33 +27,36 @@ public class NestBehavior : MonoBehaviour, ITargetable
     //Monobehaviours
     private void OnTriggerStay(Collider other)
     {
-        ITargetable behavior = other.GetComponent<ITargetable>();
-
-        if (behavior != null)
+        if (!_isDead) 
         {
-            if (behavior.GetInteractableType() == InteractableType.Pickup)
+            ITargetable behavior = other.GetComponent<ITargetable>();
+
+            if (behavior != null)
             {
-                //wait for the pickup to be dropped!
-                if (behavior.IsPickedUp() == false)
+                if (behavior.GetInteractableType() == InteractableType.Pickup)
                 {
-                    //increase the nest's nutrition value
-                    _currentNutrition += behavior.Nutrition();
-
-                    //destroy the pickup
-                    Destroy(other.gameObject);
-
-                    //can we create an egg?
-                    if (_currentNutrition >= _eggCost)
+                    //wait for the pickup to be dropped!
+                    if (behavior.IsPickedUp() == false)
                     {
+                        //increase the nest's nutrition value
+                        _currentNutrition += behavior.Nutrition();
 
-                        int incubations = _currentNutrition / _eggCost;
+                        //destroy the pickup
+                        Destroy(other.gameObject);
 
-                        //Begin Incubating as many eggs as possible!
-                        while (incubations > 0)
+                        //can we create an egg?
+                        if (_currentNutrition >= _eggCost)
                         {
-                            _currentNutrition -= _eggCost;
-                            IncubateEgg();
-                            incubations--;
+
+                            int incubations = _currentNutrition / _eggCost;
+
+                            //Begin Incubating as many eggs as possible!
+                            while (incubations > 0)
+                            {
+                                _currentNutrition -= _eggCost;
+                                IncubateEgg();
+                                incubations--;
+                            }
                         }
                     }
                 }
@@ -66,23 +71,38 @@ public class NestBehavior : MonoBehaviour, ITargetable
     //Internals
     private void IncubateEgg()
     {
-        _eggsIncubating++;
-        Invoke(nameof(HatchMinion), _hatchTime);
+        if (!_isDead)
+        {
+            _eggsIncubating++;
+            Invoke(nameof(HatchMinion), _hatchTime);
+        }
+        
     }
 
     private void HatchMinion()
     {
-        //decrement the number of eggs being incubated
-        _eggsIncubating--;
+        if (!_isDead)
+        {
+            //decrement the number of eggs being incubated
+            _eggsIncubating--;
 
-        //SpawnMinion
-        GameObject newMinionObject =Instantiate(_minionPrefab, _minionSpawnPosition.position, Quaternion.identity,_entitiesContainer);
+            //SpawnMinion
+            GameObject newMinionObject = Instantiate(_minionPrefab, _minionSpawnPosition.position, Quaternion.identity, _entitiesContainer);
 
-        //setup the minion's utils
-        newMinionObject.GetComponent<AiBehavior>().SetNest(gameObject);
+            //setup the minion's utils
+            newMinionObject.GetComponent<AiBehavior>().SetNest(gameObject);
+        }
+        
     }
 
+    private void Die()
+    {
+        //set the death state
+        _isDead = true;
 
+        //kill any eggs being incubated
+        CancelInvoke(nameof(HatchMinion));
+    }
 
 
 
@@ -130,12 +150,21 @@ public class NestBehavior : MonoBehaviour, ITargetable
 
     public void TakeDamage(ITargetable aggressor, int damage)
     {
-        //take damage
-        //...
+        _health -= damage;
+
+        if (_health <= 0)
+        {
+            Die();
+        }
     }
 
     public bool IsDead()
     {
         return _isDead;
+    }
+
+    public int GetHealth()
+    {
+        return _health;
     }
 }
