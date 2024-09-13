@@ -2399,10 +2399,14 @@ PrefabInstance:
       objectReference: {fileID: 444211907}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _activationTime
-      value: 30
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _autoActivateAfterTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: _burstMinionSpawnCountMax
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}

@@ -6,45 +6,24 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     [SerializeField] private int _nutrition = 100;
     [SerializeField] private bool _isBeingCarried = false;
     [SerializeField] private bool _isReadyToBePickedUp = true;
-    [SerializeField] private float _pickupCooldown = .5f;
+    [SerializeField] private float _pickupCooldown = 1.5f;
     [SerializeField] private bool _isGravityEnabled = false;
-    [Tooltip("How long a pickup will wait before removing itself from gravity after being dropped")]
-    [SerializeField] private float _gravityResetTime = 2f;
-    private Rigidbody _rb;
+    [SerializeField] private Rigidbody _rb;
 
     //Monos
-
-    private void Awake()
-    {
-        _rb = GetComponent<Rigidbody>();
-    }
 
 
 
 
     //Internals
-    private void DisableGravity()
+    private void DisablePhysics()
     {
-        if (_isGravityEnabled)
-        {
-            _rb.useGravity = false;
-            _isGravityEnabled = false;
-
-            CancelInvoke(nameof(DisableGravity));
-        }
+            _rb.isKinematic = true;
     }
 
-    private void TemporarilyEnableGravity()
+    private void EnablePhysics()
     {
-        //is gravity off?
-        if (!_isGravityEnabled)
-        {
-            _rb.useGravity = true;
-            _isGravityEnabled = true;
-
-            //start counting down before gravity is stopped
-            Invoke(nameof(DisableGravity), _gravityResetTime);
-        }
+            _rb.isKinematic = false;
     }
 
     private void ReadyPickup()
@@ -89,14 +68,14 @@ public class PickupBehavior : MonoBehaviour, ITargetable
 
         //make sure gravity is disabled when being carried
         if (_isBeingCarried)
-            DisableGravity();
+            DisablePhysics();
 
         //make sure to enable gravity when being dropped
         else if (!_isBeingCarried)
         {
-            TemporarilyEnableGravity();
+            EnablePhysics();
 
-            //cooldown the pickup, so it doen't get juggled each frame by ai
+            //cooldown the pickup, so it doesn't get juggled each frame by ai
             _isReadyToBePickedUp = false;
             Invoke(nameof(ReadyPickup),_pickupCooldown);
         }

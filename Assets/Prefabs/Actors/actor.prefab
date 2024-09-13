@@ -199,7 +199,8 @@ MonoBehaviour:
   _isMovingToGroundPosition: 0
   _isTargetInRange: 0
   _distanceFromTarget: 0
-  _closeEnoughDistance: 0.5
+  _closeEnoughInteractDistance: 0.5
+  _closeEnoughMoveDistance: 1.5
   _isCarryingObject: 0
   _pickupDuration: 0.1
   _health: 6

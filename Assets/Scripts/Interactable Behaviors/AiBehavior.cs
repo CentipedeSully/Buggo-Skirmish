@@ -929,10 +929,19 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         if ( _isLerpingPickup)
         {
+            //tick the lerp time
             _currentPickupLerpTime += Time.deltaTime;
 
+            //is our carry object still being carried?
             if (_carriedObject != null)
-                _carriedObject.transform.localPosition = Vector3.Lerp(_pickupObjectPosition, _carryParent.localPosition, _currentPickupLerpTime / _pickupDuration);
+            {
+                //calculate the carry object's origin (the origin is this Minion's MOUTH)
+                Vector3 localOrigin = _carryParent.transform.TransformPoint(Vector3.zero);
+
+                //adjust the object's position into the mouth over time
+                _carriedObject.transform.position = Vector3.Lerp(_pickupObjectPosition, localOrigin, _currentPickupLerpTime / _pickupDuration);
+            }
+                
 
             if (_currentPickupLerpTime >= _pickupDuration || _carriedObject == null)
             {
@@ -970,7 +979,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _headAnimator.SetBool("isCarrying", true);
 
             //setup lerp utils
-            _pickupObjectPosition = _carriedObject.transform.localPosition;
+            _pickupObjectPosition = _carriedObject.transform.position;
             _currentPickupLerpTime = 0;
 
             //start lerping
@@ -1038,7 +1047,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
         _selfAgent.enabled = false;
 
         //throw the body around a bit ^_^
-        TemporarilyEnableGravity();
+        EnablePhysics();
         float xRandom = UnityEngine.Random.Range(-1, 1);
         float yRandom = UnityEngine.Random.Range(-1, 1);
         float zRandom = UnityEngine.Random.Range(-1, 1);
@@ -1048,6 +1057,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
         _rb.AddForce(Vector3.up * UnityEngine.Random.Range(_onDeathThrowForceMin, _onDeathThrowForceMax), ForceMode.Impulse);
         _rb.AddTorque(new Vector3(xRandom, yRandom, zRandom) * UnityEngine.Random.Range(_onDeathThrowTorqueMin, _onDeathThrowTorqueMax), ForceMode.Impulse);
 
+        //enable gravity after we've been thrown off the ground
+        Invoke(nameof(UseGravity), .2f);
 
         //make it available for pickup after a delay
         Invoke(nameof(ReadyPickup), _pickupCooldown);
@@ -1057,28 +1068,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _leaderObject.GetComponent<PlayerBehavior>().RemoveFollower(this);
     }
 
-    private void DisableGravity()
-    {
-        if (_isGravityEnabled)
-        {
-            _rb.useGravity = false;
-            _isGravityEnabled = false;
+    private void UseGravity() { _rb.useGravity = true; }
 
-            CancelInvoke(nameof(DisableGravity));
-        }
+    private void DisablePhysics()
+    {
+        _rb.isKinematic = true;
     }
 
-    private void TemporarilyEnableGravity()
+    private void EnablePhysics()
     {
-        //is gravity off?
-        if (!_isGravityEnabled)
-        {
-            _rb.useGravity = true;
-            _isGravityEnabled = true;
-
-            //start counting down before gravity is stopped
-            Invoke(nameof(DisableGravity), _gravityResetTime);
-        }
+        _rb.isKinematic = false;
     }
 
     private void ReadyPickup()
@@ -1221,14 +1220,14 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
             //make sure gravity is disabled when being carried
             if (_isPickedUp)
-                DisableGravity();
+                DisablePhysics();
 
             //make sure to enable gravity when being dropped
             else if (!_isPickedUp)
             {
-                TemporarilyEnableGravity();
+                EnablePhysics();
 
-                //cooldown the pickup, so it doen't get juggled each frame by ai
+                //cooldown the pickup, so it doesn't get juggled each frame by ai
                 _isReadyToBePickedUp = false;
                 Invoke(nameof(ReadyPickup), _pickupCooldown);
             }
