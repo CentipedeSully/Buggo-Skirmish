@@ -21,10 +21,24 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private int _health = 60;
     private bool _isDead;
 
+    [SerializeField] private List<MeshRenderer> _nestMeshRenderers = new();
+    [SerializeField] private List<Material> _playerNestMaterials = new();
+    [SerializeField] private List<Material> _nestKilledMaterials = new();
+    [SerializeField] private ParticleSystem _idleParticles;
+    [SerializeField] private ParticleSystem _onDamagedParticles;
+    [SerializeField] private ParticleSystem _onMinionSpawnedParticles;
+    [SerializeField] private ParticleSystem _onPickupDepositParticles;
+    [SerializeField] private Animator _animator;
+
 
 
 
     //Monobehaviours
+    private void Start()
+    {
+        UpdateNestAppearance();
+    }
+
     private void OnTriggerStay(Collider other)
     {
         if (!_isDead) 
@@ -44,9 +58,16 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
                         //destroy the pickup
                         Destroy(other.gameObject);
 
+                        //play the deposit plarticles
+                        _onPickupDepositParticles.Play();
+                        StopDepositParticlesAfterDelay();
+
                         //can we create an egg?
                         if (_currentNutrition >= _eggCost)
                         {
+                            //enter the incubating animation if we aren't there already
+                            if (!_animator.GetBool("isIncubating"))
+                                _animator.SetBool("isIncubating", true);
 
                             int incubations = _currentNutrition / _eggCost;
 
@@ -69,6 +90,64 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
 
 
     //Internals
+    private void UpdateNestAppearance()
+    {
+        if (!_isDead)
+        {
+            //reflect the player's color
+            foreach (MeshRenderer meshRenderer in _nestMeshRenderers)
+                meshRenderer.SetMaterials(_playerNestMaterials);
+
+            //play the idle particles
+            _idleParticles.Play();
+        }
+
+        else
+        {
+            //reflect the death color
+            foreach (MeshRenderer meshRenderer in _nestMeshRenderers)
+                meshRenderer.SetMaterials(_nestKilledMaterials);
+
+            //stop the idle particles
+            _idleParticles.Stop();
+        }
+    }
+
+    private void StopDepositParticlesAfterDelay()
+    {
+        CancelInvoke(nameof(StopDepositParticles));
+        Invoke(nameof(StopDepositParticles), 0.1f);
+    }
+
+    private void StopDepositParticles()
+    {
+        _onPickupDepositParticles.Stop();
+        
+    }
+
+    private void StopMinionSpawnedParticlesAfterDelay()
+    {
+        CancelInvoke(nameof(StopMinionSpawnedParticles));
+        Invoke(nameof(StopMinionSpawnedParticles), 0.1f);
+    }
+
+    private void StopMinionSpawnedParticles()
+    {
+        _onMinionSpawnedParticles.Stop();
+    }
+
+    private void StopDamagedParticlesAfterDelay()
+    {
+        CancelInvoke(nameof(StopDamagedParticles));
+        Invoke(nameof(StopDamagedParticles), 0.1f);
+    }
+
+    private void StopDamagedParticles()
+    {
+        _onDamagedParticles.Stop();
+
+    }
+
     private void IncubateEgg()
     {
         if (!_isDead)
@@ -91,6 +170,16 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
 
             //setup the minion's utils
             newMinionObject.GetComponent<AiBehavior>().SetNest(gameObject);
+
+            //play minion spawned particles
+            _onMinionSpawnedParticles.Play();
+            StopMinionSpawnedParticlesAfterDelay();
+
+            if (_eggsIncubating == 0)
+            {
+                //exit the incubation state
+                _animator.SetBool("isIncubating", false);
+            }
         }
         
     }
@@ -99,9 +188,30 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     {
         //set the death state
         _isDead = true;
+        UpdateNestAppearance();
 
-        //kill any eggs being incubated
-        CancelInvoke(nameof(HatchMinion));
+        if (_eggsIncubating > 0)
+        {
+            _eggsIncubating = 0;
+
+            //kill any eggs being incubated
+            CancelInvoke(nameof(HatchMinion));
+
+            //exit the incubation state
+            _animator.SetBool("isIncubating", false);
+        }
+        
+    }
+
+    private void ResetDamagedAnimAfteerDelay()
+    {
+        CancelInvoke(nameof(ResetDamagedAnim));
+        Invoke(nameof(ResetDamagedAnim), .1f);
+    }
+
+    private void ResetDamagedAnim()
+    {
+        _animator.SetBool("isDamaged", false);
     }
 
 
@@ -151,6 +261,14 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     public void TakeDamage(ITargetable aggressor, int damage)
     {
         _health -= damage;
+
+        //play damage particles
+        _onDamagedParticles.Play();
+        StopDamagedParticlesAfterDelay();
+
+        //play animation
+        _animator.SetBool("isDamaged", true);
+        ResetDamagedAnimAfteerDelay();
 
         if (_health <= 0)
         {

@@ -895,7 +895,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
                         if (_lastResourcePoint != null)
                         {
                             //Go back to that location. Chances are there's more to pickup
-                            MoveToPosition(_lastResourcePoint.GetGameObject().transform.position);
+                            MoveToPosition(_lastResourcePoint.PickupSpawnLocation());
                         }
                         else
                         {

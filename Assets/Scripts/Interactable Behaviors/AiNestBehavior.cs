@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Rendering;
+using UnityEngine.VFX;
 
 
 
@@ -10,58 +11,122 @@ public interface IResourcePoint
     public bool IsResourcePointAvailable();
 
     public GameObject GetGameObject();
+
+    public Vector3 PickupSpawnLocation();
 }
 
 
 public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
 {
     //Declarations
-    [SerializeField] private Transform _actorsContainer;
-    [SerializeField] private Transform _pickupsContainer;
+    [Header("General Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Nest;
     [SerializeField] private Faction _faction = Faction.Enemy;
     [SerializeField] private int _health = 60;
     [SerializeField] private bool _isDead = false;
+    [SerializeField] private bool _isSpawning = false;
+    [SerializeField] private bool _isNestActive = false;
+    [SerializeField] private float _activationTime = 20f;
+    [SerializeField] private bool _autoActivateAfterTime = false;
+
+
+
+    [Header("Minion Spawn Settings")]
+    [SerializeField] private Transform _actorsContainer;
     [SerializeField] private List<Transform> _minionSpawnPositions = new();
-    [SerializeField] private Transform _pickupSpawnPosition;
     [SerializeField] private List<GameObject> _minionPrefabs = new();
-    [SerializeField] private List<GameObject> _pickupPrefabs= new();
     [SerializeField] private Transform _rallyPoint;
     [SerializeField] private float _minionSpawnCooldown = 15f;
     [SerializeField] private bool _isMinionSpawnerReady = true;
     [SerializeField] private float _burstMinionSpawnDelay = 1f;
     [SerializeField] private int _burstMinionSpawnCountMin = 3;
     [SerializeField] private int _burstMinionSpawnCountMax = 7;
+    private IEnumerator _minionBurstSpawnManager;
+
+
+
+    [Header("Pickup Spawn Settings")]
+    [SerializeField] private Transform _pickupsContainer;
+    [SerializeField] private Transform _pickupSpawnPosition;
+    [SerializeField] private List<GameObject> _pickupPrefabs= new();
     [SerializeField] private float _pickupSpawnCooldown = 10f;
     [SerializeField] private bool _isPickupSpawnerReady = true;
     [SerializeField] private float _burstPickupSpawnDelay = .2f;
     [SerializeField] private int _burstPickupSpawnCountMin = 3;
     [SerializeField] private int _burstPickupSpawnCountMax = 4;
-    [SerializeField] private bool _isSpawning = false;
-    [SerializeField] private bool _isNestActive = false;
-    [SerializeField] private float _activationTime = 20f;
-    [SerializeField] private bool _autoActivateAfterTime = false;
-
-    private IEnumerator _minionBurstSpawnManager;
     private IEnumerator _pickupBurstSpawnManager;
+
+    [Header("Visual Queue Settings")]
+    [SerializeField] private Animator _animator;
+    [SerializeField] private List<MeshRenderer> _nestMeshRenderers = new();
+    [SerializeField] private List<Material> _minionNestMaterials;
+    [SerializeField] private List<Material> _pickupNestMaterials;
+    [SerializeField] private ParticleSystem _minionModeParticles;
+    [SerializeField] private ParticleSystem _pickupModeParticles;
+    [SerializeField] private ParticleSystem _OnMinionSpawnParticles;
+    [SerializeField] private ParticleSystem _OnPickupSpawnParticles;
+    [SerializeField] private ParticleSystem _OnDamagedParticles;
+
+
 
 
     //Monobehaviours
     private void Start()
     {
+        UpdateNestAppearanceBasedOnState();
+
+        //Countdown activation of this nest if toggled
         if (_autoActivateAfterTime)
             Invoke(nameof(ActivateNest), _activationTime);
     }
 
 
-
     //Internals
+    private void UpdateNestAppearanceBasedOnState()
+    {
+        //are we spawning minions?
+        if (!_isDead)
+        {
+            //apply minion visuals
+            ApplyMaterials(_minionNestMaterials);
+
+            if (_isNestActive)
+            {
+                //activate minion particle effects and stop pickup particles
+                _minionModeParticles.Play();
+                _pickupModeParticles.Stop();
+            }
+        }
+        
+        //We are spawning pickups
+        else
+        {
+            //apply pickup visuals
+            ApplyMaterials(_pickupNestMaterials);
+
+            if (_isNestActive)
+            {
+                //activate pickup particle effects & stop minion particles
+                _minionModeParticles.Stop();
+                _pickupModeParticles.Play();
+            }
+        }
+    }
+
+    private void ApplyMaterials(List<Material> materialsList)
+    {
+        //apply the material to this nest
+        foreach (MeshRenderer mesh in _nestMeshRenderers)
+            mesh.SetMaterials(materialsList);
+    }
+
+
     private void Die()
     {
         _isDead = true;
+        _isNestActive = true;
 
-        //play death animation
-        //...
+        UpdateNestAppearanceBasedOnState();
 
         //stop spawning Minions
         StopMinionSpawning();
@@ -130,6 +195,13 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
         if (currentSpawnCount > targetSpawnCount)
             targetSpawnCount = currentSpawnCount + 1;
 
+        if (targetSpawnCount > 0)
+        {
+            //Play the minion spawn burst
+            _OnMinionSpawnParticles.Play();
+            Invoke(nameof(StopMinionParticleBurst), .1f);
+        }
+
         //are we below our spawn quota (and are we still alive)?
         while (currentSpawnCount < targetSpawnCount && !_isDead)
         {
@@ -151,6 +223,21 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
 
         //Cooldown the nest's spawning
         Invoke(nameof(ReadyMinionSpawner), _minionSpawnCooldown);
+    }
+
+    private void StopMinionParticleBurst()
+    {
+        _OnMinionSpawnParticles.Stop();
+    }
+
+    private void StopPickupParticleBurst()
+    {
+        _OnPickupSpawnParticles.Stop();
+    }
+
+    private void StopDamagedParticleBurst()
+    {
+        _OnDamagedParticles.Stop();
     }
 
     private void ReadyMinionSpawner()
@@ -189,6 +276,13 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
         //make sure no one makes any editor mistakes ;)
         if (currentSpawnCount > targetSpawnCount)
             targetSpawnCount = currentSpawnCount + 1;
+
+        if (targetSpawnCount > 0)
+        {
+            //Play the pickup spawn burst
+            _OnPickupSpawnParticles.Play();
+            Invoke(nameof(StopPickupParticleBurst), .1f);
+        }
 
         //are we below our spawn quota
         while (currentSpawnCount < targetSpawnCount)
@@ -315,25 +409,46 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     {
         if (!_isDead)
         {
+            //play the particle effect
+            _OnDamagedParticles.Play();
+            Invoke(nameof(StopDamagedParticleBurst), .1f);
+
             //damage this nest
             _health -= damage;
 
             //play the damaged animation
-            //...
+            _animator.SetBool("isDamaged", true);
+
+            //cancel any counting resetDamageAnim calls, in case we're getting badly mobbed
+            CancelInvoke(nameof(ResetDamageAnim));
+
+            //reset the damage state (staying away from unity anim triggers ^_^)
+            Invoke(nameof(ResetDamageAnim), .1f);
 
             if (_health <= 0)
                 Die();
+            else
+            {
+                //awaken!
+                ActivateNest();
+            }
         }
     }
+    private void ResetDamageAnim() { _animator.SetBool("isDamaged", false); }
 
     public void ActivateNest()
     {
-        if (!_isNestActive && !_isDead)
+        if (!_isNestActive)
         {
             _isNestActive = true;
+            UpdateNestAppearanceBasedOnState();
 
-            //start spawning minions!
-            StartMinionBurst();
+            //is this nest alive with minions?
+            if (!_isDead)
+                StartMinionBurst();
+
+            //Otherwise start spawning pickups instead
+            else StartPickupBurst();
         }
     }
 
@@ -347,5 +462,10 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     {
         //if the nest is dead, then it's spawning pickups
         return _isDead;
+    }
+
+    public Vector3 PickupSpawnLocation()
+    {
+        return _pickupSpawnPosition.position;
     }
 }
