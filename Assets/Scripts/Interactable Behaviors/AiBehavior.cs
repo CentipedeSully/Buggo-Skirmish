@@ -102,7 +102,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
     private Vector3 _targetPosition;
     [SerializeField] private bool _isTargetInRange = false;
     [SerializeField] private float _distanceFromTarget;
-    [SerializeField] private float _closeEnoughDistance = .5f;
+    [SerializeField] private float _closeEnoughInteractDistance = .5f;
+    [SerializeField] private float _closeEnoughMoveDistance = 1.5f;
     [SerializeField] private bool _isCarryingObject = false;
     private GameObject _carriedObject;
     private bool _isReadyToBePickedUp = false;
@@ -156,7 +157,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
         {
             ManagePickupLerp();
             WatchSurroundings();
-            ValidateTargetingReferences();
+            ValidateTarget();
+            DetermineMoveOrderSatisfaction();
             if (!_isAttacking)
                 PursueTargetIfTargetAvailable();
             CastAttack();
@@ -178,6 +180,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
             //Calculate the direction towards the target
             Vector3 targetDirection = _currentTargetObject.transform.position - transform.position;
 
+            //ignore the direction's y, In cases where enemies are too short or too high
+            targetDirection = new Vector3(targetDirection.x, 0, targetDirection.z);
+
             //Normalize the direction
             Vector3 normalizedDirectionTowardsTarget = targetDirection.normalized;
 
@@ -189,13 +194,12 @@ public class AiBehavior : MonoBehaviour, ITargetable
             {
                 Debug.DrawRay(transform.position, forwardsDirection * 5, Color.red);
                 Debug.DrawRay(transform.position, normalizedDirectionTowardsTarget * 5, Color.yellow);
-                
             }
 
             //calculate the angle between our forwards and the normalizedTargetDirection
             float angleDifference = Vector3.SignedAngle(forwardsDirection, normalizedDirectionTowardsTarget,Vector3.up);
             
-            //Log the angular difference, if needed
+            //Log the angular difference, if needed (Use this in case the minion approaches a target but doesn't attack it)
             //Debug.Log($"angle difference: {angleDifference}");
             
             //is the target within a tolerable alignment
@@ -381,13 +385,23 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void WatchSurroundings()
     {
-        //are we idling and NOT following a move order
-        if (_currentState == ActorState.Idle && !_isMovingToGroundPosition)
-            DetectAnything();
+        //Are we idling?
+        if (_currentState == ActorState.Idle)
+        {
+            //are we moving to a position via move order?
+            if (_isMovingToGroundPosition)
+            {
+                //Keep eyes open for hostiles. Ignore pickups and go straight to the destination
+                DetectHostilesOnly();
+            }
 
-        //otherwise, are idly moving towards a move order
-        else if (_currentState == ActorState.Idle && _isMovingToGroundPosition)
-            DetectHostilesOnly();
+            //Otherwise, we're chilling
+            else
+            {
+                //Keep eyes open for anything nearby that's useful or dangerous
+                DetectAnything();
+            }
+        }
     }
 
     private void DetectAnything()
@@ -640,8 +654,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void SetTarget(GameObject target)
     {
-        if (_isMovingToGroundPosition)
-            _isMovingToGroundPosition = false;
+        //Override any previous move order
+        _isMovingToGroundPosition = false;
 
         //Replace the current Target
         _currentTargetObject = target;
@@ -714,28 +728,25 @@ public class AiBehavior : MonoBehaviour, ITargetable
             
     }
 
-    private void ValidateTargetingReferences()
+    private void ValidateTarget()
     {
-        try
+        //are we not following a move order? (Move orders don't set objects as targets)
+        if (!_isMovingToGroundPosition)
         {
-            //Did a target object vanish while we were following it (ignore if we were only moving to a ground position)
-            if (_currentTargetObject == null && _isMovingToGroundPosition == false)
+            //Did our current target vanish unexpectedly?
+            if (_currentTargetObject == null)
                 SetTarget(null);
 
-
-            else if (_isMovingToGroundPosition == false && _currentTargetObject != null)
+            //then our target is valid. Watch for other cases
+            else
             {
-                //Did we suddenly lose our behavior reference?
-                if (_targetInterface == null || _currentTargetObject == null)
-                    SetTarget(null);
-
-                //are we pursuing an object that is already picked up?
+                //are we pursuing a pickup that is already picked up?
                 if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
                     _targetInterface.IsPickedUp())
                     SetTarget(null);
 
                 //are we attempting to pickup an object but have no nest reference for the dropoff?
-                if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
+                else if (_targetInterface.GetInteractableType() == InteractableType.Pickup &&
                     _nestObject == null)
                 {
                     SetTarget(null);
@@ -743,19 +754,16 @@ public class AiBehavior : MonoBehaviour, ITargetable
                 }
 
                 //are we carrying a pickup but lost our nest reference
-                if (_isCarryingObject && _nestObject == null)
+                else if (_isCarryingObject && _nestObject == null)
                 {
                     DropObjectIfCarrying();
+                    SetTarget(null);
                     //Debug.LogWarning("Nest reference is missing while minion sought to drop off an item");
                 }
             }
         }
 
-        catch(NullReferenceException)
-        {
-            DropObjectIfCarrying();
-            SetTarget(null);
-        }
+
         
     }
 
@@ -805,6 +813,27 @@ public class AiBehavior : MonoBehaviour, ITargetable
         _isInvincible = false;
     }
 
+    private void DetermineMoveOrderSatisfaction()
+    {
+        //are we currently fulfilling a move order?
+        if (_isMovingToGroundPosition)
+        {
+            float currentDistanceFromMoveOrder = (_currentTargetGroundPosition - transform.position).magnitude;
+            //are we 'close enough' to the destination? (very important to minimize 'not close enough' eternal movement)
+            if (currentDistanceFromMoveOrder <= _closeEnoughMoveDistance)
+            {
+                //we're close enough. end the move order. Now we can look for loot!
+                _isMovingToGroundPosition = false;
+
+                //stop moving
+                _isMoving = false;
+                _selfAgent.isStopped = true;
+
+                _bodyAnimator.SetBool("isMoving", false);
+            }
+        }
+    }
+
     private void InteractWithCurrentTarget()
     {
         if (_isTargetInRange)
@@ -835,8 +864,8 @@ public class AiBehavior : MonoBehaviour, ITargetable
                     //if the target is a pickup?
                     if (_targetInterface.GetInteractableType() == InteractableType.Pickup)
                     {
-                        //is the object available for pickup?
-                        if (_targetInterface.IsReadyForPickup())
+                        //is the object available for pickup? (and is the pickup not already grabbed)
+                        if (_targetInterface.IsReadyForPickup() && !_targetInterface.IsPickedUp())
                         {
                             //pickup the thing
                             PickupObject(_currentTargetObject);
@@ -982,7 +1011,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _distanceFromTarget = Mathf.Abs((_currentTargetGroundPosition - transform.position).magnitude);
 
             //are we close enough to our target position?
-            if (_distanceFromTarget <= _closeEnoughDistance)
+            if (_distanceFromTarget <= _closeEnoughInteractDistance)
             {
                 //update our move states
                 _isMovingToGroundPosition = false;
@@ -1100,7 +1129,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         if (!_isDead)
         {
-            //clear the current targeting data
+            //clear the current targeting data (consequently sets the actor state to 'idle')
             SetTarget(null);
 
             //set the moving to ground position state

@@ -181,7 +181,7 @@ MonoBehaviour:
   _onDeathThrowTorqueMin: 100
   _onDeathThrowTorqueMax: 300
   _interactionRange: 2.5
-  _nutrition: 34
+  _nutrition: 50
   _interactableDetectionRange: 6
   _autoFollowLeaderRange: 3
   _interactableRangeGizmoColor: {r: 1, g: 1, b: 1, a: 1}

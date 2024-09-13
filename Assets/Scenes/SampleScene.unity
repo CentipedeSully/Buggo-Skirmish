@@ -2393,7 +2393,32 @@ PrefabInstance:
       propertyPath: '_minionSpawnPositions.Array.data[2]'
       value: 
       objectReference: {fileID: 1825263152}
-    m_RemovedComponents: []
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: _rallyPoint
+      value: 
+      objectReference: {fileID: 444211907}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: _activationTime
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: _autoActivateAfterTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: _minionSpawnPositions.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: '_minionSpawnPositions.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1351901904}
+    - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: '_minionSpawnPositions.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1825263152}
+    m_RemovedComponents:
+    - {fileID: 6886818010918279881, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 2420521930289142369, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}

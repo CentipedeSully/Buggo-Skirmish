@@ -143,6 +143,10 @@ PrefabInstance:
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _nutrition
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: _atkCastRadius
       value: 0.81
       objectReference: {fileID: 0}

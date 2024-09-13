@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6393147371324399107}
-  - component: {fileID: 7969824689689605240}
-  - component: {fileID: 6886818010918279881}
+  - component: {fileID: 9158733744684048092}
+  - component: {fileID: 5011938624067782877}
   m_Layer: 9
   m_Name: EnemyNest
   m_TagString: Untagged
@@ -35,7 +35,7 @@ Transform:
   - {fileID: 2420521930289142369}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7969824689689605240
+--- !u!114 &9158733744684048092
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -51,19 +51,22 @@ MonoBehaviour:
   _pickupsContainer: {fileID: 0}
   _interactableType: 4
   _faction: 3
-  _health: 60
+  _health: 20
   _isDead: 0
-  _minionSpawnPositions: []
-  _pickupSpawnPosition: {fileID: 0}
-  _minionPrefabs: []
-  _pickupPrefabs: []
+  _minionSpawnPositions:
+  - {fileID: 1169107395875237583}
+  _pickupSpawnPosition: {fileID: 4148824758045462091}
+  _minionPrefabs:
+  - {fileID: 8469416600970419403, guid: 98daae4edacde704fbe074c26d2ddcf4, type: 3}
+  _pickupPrefabs:
+  - {fileID: 8174027236502360028, guid: d44a5fbd7262469448fa2bc2157d6951, type: 3}
   _rallyPoint: {fileID: 0}
   _minionSpawnCooldown: 15
   _isMinionSpawnerReady: 1
   _burstMinionSpawnDelay: 1
-  _burstMinionSpawnCountMin: 3
-  _burstMinionSpawnCountMax: 7
-  _pickupSpawnCooldown: 10
+  _burstMinionSpawnCountMin: 1
+  _burstMinionSpawnCountMax: 3
+  _pickupSpawnCooldown: 15
   _isPickupSpawnerReady: 1
   _burstPickupSpawnDelay: 0.2
   _burstPickupSpawnCountMin: 3
@@ -72,7 +75,7 @@ MonoBehaviour:
   _isNestActive: 0
   _activationTime: 20
   _autoActivateAfterTime: 0
---- !u!65 &6886818010918279881
+--- !u!65 &5011938624067782877
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -91,8 +94,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 0.38129723, z: 3}
-  m_Center: {x: 0, y: -0.0043772757, z: 0}
+  m_Size: {x: 1, y: 0.36864305, z: 3.0413811}
+  m_Center: {x: 0, y: -0.004320383, z: 0.00866282}
 --- !u!1 &1126301286332513653
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,7 +108,7 @@ GameObject:
   - component: {fileID: 6262422508403230250}
   - component: {fileID: 6038953642896222067}
   m_Layer: 9
-  m_Name: Cube
+  m_Name: Nest Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
