@@ -24,6 +24,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     private InputAction _mouseMovementInputAction;
     private InputAction _mouseLclickInputAction;
     private InputAction _mouseRclickInputAction;
+    private InputAction _pauseInputAction;
 
 
     private Vector2 _moveInput;
@@ -61,9 +62,10 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _deathThrowForce = 700;
     [SerializeField] private float _deathThrowTorqueMax = 600;
     [SerializeField] private float _deathThrowTorqueMin = 300;
-    
 
 
+    private delegate void PlayerPauseEvent();
+    private event PlayerPauseEvent OnMenuButtonPressed;
 
 
 
@@ -82,6 +84,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
         _mouseMovementInputAction = _playerInputReference.actions.FindAction("CameraMovement");
         _mouseLclickInputAction = _playerInputReference.actions.FindAction("LClick");
         _mouseRclickInputAction = _playerInputReference.actions.FindAction("RClick");
+        _pauseInputAction = _playerInputReference.actions.FindAction("Pause Menu");
     }
 
     private void Update()
@@ -131,6 +134,11 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
         if (_mouseLclickInputAction.WasPressedThisFrame())
             if (!_isDead)
                 GiveCommandViaManipulatorContext();
+
+        //Pause
+        if (_pauseInputAction.WasPressedThisFrame())
+            _gameManager.Pause();
+            
 
         
     }

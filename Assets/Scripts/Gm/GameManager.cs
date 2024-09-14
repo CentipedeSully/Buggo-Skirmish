@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using UnityEngine.InputSystem;
 
 
 public enum GameState
@@ -71,6 +72,10 @@ public class GameManager : MonoBehaviour
 
     private void RestartApplication()
     {
+        if (Time.timeScale != 1)
+            Time.timeScale = 1;
+
+        //reload scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
@@ -100,25 +105,6 @@ public class GameManager : MonoBehaviour
         _winPopup.SetActive(true);
     }
 
-    private void ShowControls()
-    {
-        _controlsDescription.SetActive(true);
-    }
-
-    private void HideControls() 
-    {
-        _controlsDescription.SetActive(false);
-    }
-
-    private void ShowObjective()
-    {
-        _objectiveDescription.SetActive(true);
-    }
-
-    private void HideObjective()
-    {
-        _objectiveDescription.SetActive(false);
-    }
 
 
 
@@ -178,34 +164,6 @@ public class GameManager : MonoBehaviour
     {
         if (_gameState == GameState.Playing)
             LoseGame(loseMessage);
-    }
-
-    public void ToggleControlsUI()
-    {
-        //hide controls if they're showing
-       if (_controlsDescription.activeSelf)
-            HideControls();
-
-       //otherwise show the controls (and hide the objective text if it's showing)
-       else
-        {
-            ShowControls();
-            HideObjective();
-        }
-    }
-
-    public void ToggleObjectiveUI()
-    {
-        //hide the objective if it's showing
-        if (_objectiveDescription.activeSelf)
-            HideObjective();
-
-        //otherwise show the Objective (and hide the controls if they're showing)
-        else
-        {
-            ShowObjective();
-            HideControls();
-        }
     }
 
 
