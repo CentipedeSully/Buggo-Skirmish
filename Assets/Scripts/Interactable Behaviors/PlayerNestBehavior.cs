@@ -20,6 +20,7 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Transform _minionSpawnPosition;
     [SerializeField] private int _health = 60;
     private bool _isDead;
+    private GameManager _gameManager;
 
     [SerializeField] private List<MeshRenderer> _nestMeshRenderers = new();
     [SerializeField] private List<Material> _playerNestMaterials = new();
@@ -273,6 +274,7 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
         if (_health <= 0)
         {
             Die();
+            _gameManager.TriggerGameLose("Home Nest Destroyed");
         }
     }
 
@@ -284,5 +286,10 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     public int GetHealth()
     {
         return _health;
+    }
+
+    public void SetGameManager(GameManager gm)
+    {
+        _gameManager = gm;
     }
 }

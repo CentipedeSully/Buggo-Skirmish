@@ -17,6 +17,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private PlayerManipulator _playerManipulator;
     [SerializeField] private Transform _bodyModelTransform;
     [SerializeField] private Rigidbody _rb;
+    private GameManager _gameManager;
 
     private InputAction _moveInputAction;
     private InputAction _callUnitsInputAction;
@@ -445,7 +446,11 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
 
             if (_health <= 0)
+            {
                 Die();
+                _gameManager.TriggerGameLose("You Died");
+            }
+                
 
             //enter invinc to avoid too-frequent frame-after-frame hits
             EnterInvincAfterHit();
@@ -468,6 +473,11 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     public int GetHealth()
     {
         return _health;
+    }
+
+    public void SetGameManager(GameManager gm)
+    {
+        _gameManager = gm;
     }
 
 

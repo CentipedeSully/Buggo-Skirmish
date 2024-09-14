@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System;
+using TMPro;
 
 
 public enum GameState
@@ -19,9 +21,34 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameState _gameState = GameState.Standby;
     private bool _isPaused = false;
     [SerializeField] private List<AiNestBehavior> _nests;
+    [SerializeField] private PlayerBehavior _player;
+    [SerializeField] private PlayerNestBehavior _playerNest;
+
+
     [Header("UI")]
     [SerializeField] private GameObject _controlsDescription;
     [SerializeField] private GameObject _objectiveDescription;
+    [SerializeField] private GameObject _pausePopup;
+    [SerializeField] private GameObject _winPopup;
+    [SerializeField] private GameObject _losePopup;
+    [SerializeField] private TextMeshProUGUI _loseMessage;
+
+    
+
+
+
+    //monobehavior
+    private void Start()
+    {
+        _gameState = GameState.Playing;
+
+        foreach (AiNestBehavior nest in _nests)
+            nest.SetGameManager(this);
+
+        _playerNest.SetGameManager(this);
+        _player.SetGameManager(this);
+    }
+
 
 
     //Internals
@@ -29,12 +56,14 @@ public class GameManager : MonoBehaviour
     {
         if (newState == false)
         {
+            _pausePopup.SetActive(false);
             _isPaused = false;
             Time.timeScale = 1;
         }
             
         else
         {
+            _pausePopup.SetActive(true);
             _isPaused = true;
             Time.timeScale = 0;
         }
@@ -58,14 +87,17 @@ public class GameManager : MonoBehaviour
             nest.ActivateNest();
     }
 
-    private void LoseGame()
+    private void LoseGame(string loseMessage = "")
     {
         _gameState = GameState.Lose;
+        _losePopup.SetActive(true);
+        _loseMessage.text = loseMessage;
     }
 
     private void WinGame()
     {
         _gameState = GameState.Win;
+        _winPopup.SetActive(true);
     }
 
     private void ShowControls()
@@ -89,7 +121,21 @@ public class GameManager : MonoBehaviour
     }
 
 
+
     //Externals
+    public void RemoveNestFromActiveNests(AiNestBehavior defeatedNest)
+    {
+        if (_nests.Contains(defeatedNest) && _gameState == GameState.Playing)
+        {
+            _nests.Remove(defeatedNest);
+
+            if (_nests.Count == 0)
+                WinGame();
+        }
+            
+
+    }
+
     public void Pause()
     {
         SetPause(true);
@@ -124,12 +170,14 @@ public class GameManager : MonoBehaviour
 
     public void TriggerGameWin()
     {
-        WinGame();
+        if (_gameState == GameState.Playing)
+            WinGame();
     }
 
-    public void TriggerGameLose()
+    public void TriggerGameLose( string loseMessage = "")
     {
-        LoseGame();
+        if (_gameState == GameState.Playing)
+            LoseGame(loseMessage);
     }
 
     public void ToggleControlsUI()

@@ -28,7 +28,7 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     [SerializeField] private bool _isNestActive = false;
     [SerializeField] private float _activationTime = 20f;
     [SerializeField] private bool _autoActivateAfterTime = false;
-
+    private GameManager _gameManager;
 
 
     [Header("Minion Spawn Settings")]
@@ -426,7 +426,11 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
             Invoke(nameof(ResetDamageAnim), .1f);
 
             if (_health <= 0)
+            {
                 Die();
+                _gameManager.RemoveNestFromActiveNests(this);
+            }
+                
             else
             {
                 //awaken!
@@ -467,5 +471,10 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     public Vector3 PickupSpawnLocation()
     {
         return _pickupSpawnPosition.position;
+    }
+
+    public void SetGameManager(GameManager gm)
+    {
+        _gameManager = gm;
     }
 }
