@@ -68,8 +68,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Animator _headAnimator;
     [SerializeField] private Animator _bodyAnimator;
     [SerializeField] private Rigidbody _rb;
-    [SerializeField] private bool _isGravityEnabled = false;
-    [SerializeField] private float _gravityResetTime = 3f;
 
     [Header("Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Minion;

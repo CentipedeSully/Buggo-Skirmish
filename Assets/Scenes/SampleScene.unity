@@ -628,6 +628,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 87ede3ef-5874-463d-8008-575bb0cb0fbe
     m_ActionName: 'Player/Call Units[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a1e9c06d-45a3-4112-a763-c6dfa7bbbb6f
+    m_ActionName: 'Player/Pause Menu[/Keyboard/escape]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1986,7 +1990,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _autoActivateAfterTime
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _burstMinionSpawnCountMax
@@ -4145,7 +4149,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1427374003}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 0efd8701bf913474b94de50a7b487f4a, type: 3}
@@ -6582,6 +6586,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1346657347}
     - target: {fileID: 6028751558855064469, guid: 68c3e0d6025ab9948983d3f8f5ccbe4e, type: 3}
+      propertyPath: _turnSpeed
+      value: 75.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6028751558855064469, guid: 68c3e0d6025ab9948983d3f8f5ccbe4e, type: 3}
       propertyPath: _cameraParent
       value: 
       objectReference: {fileID: 367037162}
@@ -6822,7 +6830,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _autoActivateAfterTime
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9158733744684048092, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: _burstMinionSpawnCountMax

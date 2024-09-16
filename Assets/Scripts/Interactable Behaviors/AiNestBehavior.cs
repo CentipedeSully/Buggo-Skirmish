@@ -477,4 +477,9 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     {
         _gameManager = gm;
     }
+
+    public bool IsSpawning()
+    {
+        return _isSpawning;
+    }
 }

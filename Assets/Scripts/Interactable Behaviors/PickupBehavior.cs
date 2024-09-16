@@ -7,7 +7,6 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     [SerializeField] private bool _isBeingCarried = false;
     [SerializeField] private bool _isReadyToBePickedUp = true;
     [SerializeField] private float _pickupCooldown = 1.5f;
-    [SerializeField] private bool _isGravityEnabled = false;
     [SerializeField] private Rigidbody _rb;
 
     //Monos

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine.Windows;
 using UnityEngine.AI;
 using static UnityEngine.GraphicsBuffer;
+using UnityEngine.Animations;
 
 
 
@@ -38,13 +39,8 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _actionCooldownDuration = .1f;
     private bool _isUnitCallReady = true;
     
-
-    private bool _isLerpingBody = false;
-    [SerializeField]private float _bodyRotationLerpDuration = .3f;
-    private float _currentRotationTime = 0;
-    private Vector3 _startLookatVector;
-    private Vector3 _targetLookAtVector;
-    private Vector3 _currentLookAtVector;
+    [SerializeField] private float _turnSpeed = 180;
+    [SerializeField] private float _lookAngleTolerance = 10;
 
     private Vector3 _cameraRelativeMoveDirection;
     private Vector3 _worldMoveVector;
@@ -64,19 +60,12 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _deathThrowTorqueMin = 300;
 
 
-    private delegate void PlayerPauseEvent();
-    private event PlayerPauseEvent OnMenuButtonPressed;
-
-
 
     //Monobehaviours
     private void Start()
     {
         //make the player ignore the idel and move anims (they break, currently when the player turns)
         _bodyAnimator.SetBool("isPlayer", true);
-
-        //defualt the _currentLookAtDirection
-        _currentLookAtVector = transform.position + transform.TransformDirection(Vector3.forward);
 
         //Collect action references
         _moveInputAction = _playerInputReference.actions.FindAction("PlayerMovement");
@@ -94,9 +83,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
         if (!_isDead)
         {
-
             MovePlayer();
-            LerpBodyRotationTowardsLookAtPosition();
             CallNearbyUnits();
         }
     }
@@ -143,31 +130,6 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
         
     }
 
-    private void LerpBodyRotationTowardsLookAtPosition()
-    {
-        if (_isLerpingBody)
-        {
-            //update the time
-            _currentRotationTime += Time.deltaTime;
-
-            //blend the current lookat position into the target vector over time
-            _currentLookAtVector = Vector3.Lerp(_startLookatVector, _targetLookAtVector, _currentRotationTime / _bodyRotationLerpDuration);
-
-            //make the player's body rotate towards the current lookAt position
-            _bodyModelTransform.LookAt(_currentLookAtVector);
-
-            //stop lerping if we've reached out target position
-            if (_currentLookAtVector == _targetLookAtVector)
-            {
-                _isLerpingBody = false;
-                _currentRotationTime = 0;
-
-            }
-
-
-        }
-    }
-
     private void MovePlayer()
     {
         if (_moveInput != Vector2.zero)
@@ -182,19 +144,29 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
             //calculate the properly-displaced move vector
             _worldMoveVector = transform.position + _cameraRelativeMoveDirection;
 
+            //calculate our forwards direction
+            Vector3 bodyForwardsVector = _bodyModelTransform.TransformVector(Vector3.forward);
+
+            //Draw the forwards direction for debug purposes (if necessary)
+            Debug.DrawRay(_bodyModelTransform.position, bodyForwardsVector * 5);
+
             //move the player
             transform.Translate(_moveSpeed * Time.deltaTime * _cameraRelativeMoveDirection);
 
-            //are we NOT currently looking
-            if (_currentLookAtVector.normalized != _worldMoveVector.normalized)
-            {
-                //Setup the rotation-over-time utilities 
-                _targetLookAtVector = _worldMoveVector;
-                _startLookatVector = new Vector3(_currentLookAtVector.x, transform.position.y,_currentLookAtVector.z); //make sure the vector is level
-                _currentRotationTime = 0;
+            //calculate the angle from the body forwards to themove vector
+            float signedAngle  = Vector3.SignedAngle(bodyForwardsVector, _cameraRelativeMoveDirection, Vector3.up);
 
-                //start rotating the player's body towards the move direction
-                _isLerpingBody = true;
+            //Log the math, for clarity
+            Debug.Log($"Player Angle: {signedAngle}");
+
+            //are we currently outside the specified angular tolerance
+            if ( signedAngle < -_lookAngleTolerance || signedAngle > _lookAngleTolerance)
+            {
+                //Calculate a rotation additive that's in the opposite direction of our signed angular difference
+                Vector3 additiveRotation = Vector3.up * Time.deltaTime * _turnSpeed * Mathf.Sign(signedAngle);
+
+                //apply the rotation to the object
+                _bodyModelTransform.eulerAngles += additiveRotation;
             }
             
         }
