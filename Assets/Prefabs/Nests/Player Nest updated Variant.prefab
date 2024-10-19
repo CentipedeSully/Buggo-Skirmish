@@ -28,6 +28,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: On Deposit Burst
       objectReference: {fileID: 0}
+    - target: {fileID: 5011938624067782877, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: m_Size.x
+      value: 3.0209856
+      objectReference: {fileID: 0}
+    - target: {fileID: 5011938624067782877, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+      propertyPath: m_Center.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6017337246053807190, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -113,6 +121,8 @@ MonoBehaviour:
   _playerObject: {fileID: 0}
   _minionSpawnPosition: {fileID: 2082093534697362176}
   _health: 60
+  _hoverController: {fileID: 1055161260701437285}
+  _isHovered: 0
   _nestMeshRenderers:
   - {fileID: 6850601364088396476}
   - {fileID: 6501079507593197107}
@@ -127,6 +137,17 @@ MonoBehaviour:
   _onMinionSpawnedParticles: {fileID: 8816421226713117889}
   _onPickupDepositParticles: {fileID: 7620722219397540862}
   _animator: {fileID: 1334356601999491311}
+--- !u!114 &1055161260701437285 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 177956377115111594, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}
+  m_PrefabInstance: {fileID: 926780492893322703}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589913704890939429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a24924265bc1624f8d58b8bbd8aefb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!95 &1334356601999491311 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 2186501674314136864, guid: 4f77972b4a418514fa91fd9453a629ca, type: 3}

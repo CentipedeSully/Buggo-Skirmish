@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PickupBehavior : MonoBehaviour, ITargetable
@@ -8,6 +9,8 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     [SerializeField] private bool _isReadyToBePickedUp = true;
     [SerializeField] private float _pickupCooldown = 1.5f;
     [SerializeField] private Rigidbody _rb;
+    [SerializeField] private MaterialController _materialController;
+    [SerializeField] private bool _isHovered;
 
     //Monos
 
@@ -101,5 +104,39 @@ public class PickupBehavior : MonoBehaviour, ITargetable
     public int GetHealth()
     {
         return -1;
+    }
+
+    public void OnHoverEntered()
+    {
+        if (!_isHovered)
+        {
+            _isHovered = true;
+            _materialController.ToggleBlinkingVisual(true);
+        }
+
+    }
+
+    public void OnHoverExited()
+    {
+        if (_isHovered)
+        {
+            _isHovered = false;
+            _materialController.ToggleBlinkingVisual(false);
+        }
+    }
+
+    public bool IsHovered()
+    {
+        return _isHovered;
+    }
+
+    public bool IsSelectable()
+    {
+        return true;
+    }
+
+    public void PlaySound(SoundType type)
+    {
+        //...
     }
 }

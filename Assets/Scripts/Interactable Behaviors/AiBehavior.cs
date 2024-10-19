@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -56,6 +57,27 @@ public interface ITargetable
     public bool IsDead();
 
     public int GetHealth();
+
+    public void OnHoverEntered();
+
+    public void OnHoverExited();
+
+    public bool IsHovered();
+
+    public bool IsSelectable();
+
+    public void PlaySound(SoundType type);
+}
+
+public interface ICommandable
+{
+    GameObject GetGameObject();
+
+    void OnSelect();
+
+    void OnCommand();
+
+    Faction GetFaction();
 }
 
 
@@ -68,6 +90,18 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private Animator _headAnimator;
     [SerializeField] private Animator _bodyAnimator;
     [SerializeField] private Rigidbody _rb;
+    [SerializeField] private MaterialController _materialController;
+    [SerializeField] private AudioController _audioController;
+
+    [Header("Color Definintions")]
+    [SerializeField] private ColorScheme _baseColors;
+    [SerializeField] private ColorScheme _deathColors;
+    [SerializeField] private ColorScheme _standbyColors;
+    [SerializeField] private ColorScheme _fightingColors;
+    [SerializeField] private ColorScheme _collectingColors;
+    [SerializeField] private ColorScheme _patrolingColors;
+    [SerializeField] private ColorScheme _followingLeaderColors;
+
 
     [Header("Settings")]
     [SerializeField] private InteractableType _interactableType = InteractableType.Minion;
@@ -89,6 +123,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     [SerializeField] private LayerMask _interactableLayerMask;
     [SerializeField] private GameObject _leaderObject;
     [SerializeField] private GameObject _nestObject;
+    [SerializeField] private bool _isHovered = false;
 
 
     [Header("Behavior State")]
@@ -108,6 +143,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
     private bool _isPickedUp = false;
     private float _pickupCooldown = 3;
     private bool _isDead = false;
+    private bool _isSelectable = false;
 
     [Header("Carry Lerp Utils")]
     [SerializeField] private float _pickupDuration = .1f;
@@ -341,6 +377,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
         //Cast the atk
         _isCastingAttack = true;
         Invoke(nameof(EndAttackCast), _atkCastDuration);
+
+        //play the attack sound
+        _audioController.PlayAttackingSound();
 
         //wait for the remainder of the sequence
         yield return new WaitForSeconds(_remainingAtkTime);
@@ -685,6 +724,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
         if (_currentTargetObject == null)
         {
             _currentState = ActorState.Idle;
+            _materialController.SetColors(_standbyColors);
             return;
         }
 
@@ -693,16 +733,24 @@ public class AiBehavior : MonoBehaviour, ITargetable
             (_targetInterface.GetInteractableType() == InteractableType.Nest &&  _targetInterface.GetFaction() ==_faction && _isCarryingObject)) //carrying something to our nest?
         {
             _currentState = ActorState.Collect;
+            _materialController.SetColors(_collectingColors);
         }
 
-        //are we targeting a hostile nest structure?
-        if (_targetInterface.GetInteractableType() == InteractableType.Nest && _targetInterface.GetFaction() != _faction)
+        //are we targeting a nest structure?
+        if (_targetInterface.GetInteractableType() == InteractableType.Nest && !_isCarryingObject)
         {
-            //is the nest alive?
-            if (!_targetInterface.IsDead())
+            //is it a living, non-allied nest?
+            if ( _targetInterface.GetFaction() != _faction && !_targetInterface.IsDead())
+            {
                 _currentState = ActorState.Fight;
+                _materialController.SetColors(_fightingColors);
+            }
+
             else
+            {
                 _currentState = ActorState.Idle;
+                _materialController.SetColors(_standbyColors);
+            }
         }
 
         //are we targeting the player?
@@ -710,11 +758,19 @@ public class AiBehavior : MonoBehaviour, ITargetable
         {
             //follow the leader if we're on the same team
             if (_targetInterface.GetFaction() == _faction)
+            {
                 _currentState = ActorState.Follow;
+                _materialController.SetColors(_followingLeaderColors);
+            }
+                
 
             //else Eff that guy!
-            else 
+            else
+            {
                 _currentState = ActorState.Fight;
+                _materialController.SetColors(_fightingColors);
+            }
+                
         }
             
         //are we targeting an enemy minion?
@@ -722,6 +778,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _targetInterface.GetFaction() != _faction )
         {
             _currentState = ActorState.Fight;
+            _materialController.SetColors(_fightingColors);
         }
             
     }
@@ -1011,7 +1068,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
     private void UpdateMovingToGroundPositionState()
     {
-        //have we arrived at our target location?
+        //are we pursuing a move order?
         if ( _isMovingToGroundPosition)
         {
             //calculate the distance from our target
@@ -1026,6 +1083,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
                 //exit the moving anim
                 _bodyAnimator.SetBool("isMoving", false);
+
+                //visually show that we're now idling
+                _materialController.SetColors(_standbyColors);
             }
             
 
@@ -1040,6 +1100,12 @@ public class AiBehavior : MonoBehaviour, ITargetable
 
         //Set animator state to isDead
         _bodyAnimator.SetBool("isDead", true);
+
+        //Change our color to dead
+        _materialController.SetColors(_deathColors);
+
+        //play the death sound
+        _audioController.PlayDeathSound();
 
         //disable the navAgent
         _selfAgent.enabled = false;
@@ -1082,7 +1148,6 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         _isReadyToBePickedUp = true;
     }
-
 
 
 
@@ -1133,6 +1198,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
             _isMovingToGroundPosition = true;
             _currentTargetGroundPosition = new Vector3(position.x, transform.position.y, position.z);
 
+            _materialController.SetColors(_patrolingColors);
+
+
             //set the move animation
             _bodyAnimator.SetBool("isMoving", true);
 
@@ -1162,6 +1230,9 @@ public class AiBehavior : MonoBehaviour, ITargetable
     {
         if (!_isDead && !_isInvincible)
         {
+            //play damaged sound
+            _audioController.PlayDamagedSound();
+
             if (_currentState != ActorState.Fight)
             {
                 //Drop everything
@@ -1235,6 +1306,55 @@ public class AiBehavior : MonoBehaviour, ITargetable
     public int GetHealth()
     {
         return _health;
+    }
+
+    public void OnHoverEntered()
+    {
+        if (!_isHovered)
+        {
+            _isHovered = true;
+            _materialController.ToggleBlinkingVisual(true);
+        }
+
+    }
+
+    public void OnHoverExited()
+    {
+        if (_isHovered)
+        {
+            _isHovered = false;
+            _materialController.ToggleBlinkingVisual(false);
+        }
+    }
+
+    public bool IsHovered()
+    {
+        return _isHovered;
+    }
+
+    public bool IsSelectable()
+    {
+        return _isSelectable;
+    }
+
+    public void PlaySound(SoundType type)
+    {
+        if (!_isDead)
+        {
+            switch (type)
+            {
+                case SoundType.MinionCommandFeedback:
+                    _audioController.PlayCommandedSound();
+                    break;
+
+                case SoundType.MinionSelectedFeedback:
+                    _audioController.PlaySelectedSound();
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 
     //Debugging

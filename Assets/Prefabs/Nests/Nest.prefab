@@ -9,11 +9,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6393147371324399107}
+  - component: {fileID: 7027921489257590574}
   - component: {fileID: 9158733744684048092}
   - component: {fileID: 5011938624067782877}
   m_Layer: 9
   m_Name: Nest
-  m_TagString: Untagged
+  m_TagString: Nest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -35,6 +36,27 @@ Transform:
   - {fileID: 2420521930289142369}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7027921489257590574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 356732773219845610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c84060508c7e7db48b1752c822aa0fe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _allMeshes:
+  - {fileID: 6038953642896222067}
+  - {fileID: 6261389608064584700}
+  - {fileID: 1422069040518296977}
+  - {fileID: 3997220825680732575}
+  _blinkableShader: {fileID: -6465566751694194690, guid: 3ffb742fb40c21f42b97475bc49b5c23, type: 3}
+  _primaryColorMeshes: []
+  _secondaryColorMeshes: []
+  _tertiaryColorMeshes: []
 --- !u!114 &9158733744684048092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55,6 +77,7 @@ MonoBehaviour:
   _isNestActive: 0
   _activationTime: 20
   _autoActivateAfterTime: 0
+  _materialController: {fileID: 7027921489257590574}
   _actorsContainer: {fileID: 0}
   _minionSpawnPositions:
   - {fileID: 1169107395875237583}
@@ -75,6 +98,7 @@ MonoBehaviour:
   _burstPickupSpawnDelay: 0.2
   _burstPickupSpawnCountMin: 3
   _burstPickupSpawnCountMax: 4
+  _isHovered: 0
   _animator: {fileID: 2186501674314136864}
   _nestMeshRenderers:
   - {fileID: 6038953642896222067}
@@ -109,8 +133,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 0.36864305, z: 3.0413811}
-  m_Center: {x: 0, y: -0.004320383, z: 0.00866282}
+  m_Size: {x: 2.3, y: 1, z: 2.3}
+  m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!1 &584489990233012887
 GameObject:
   m_ObjectHideFlags: 0

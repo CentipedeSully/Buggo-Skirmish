@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d947782397bcce744b74d2983b4ddae9, type: 3}
+  m_Name: BasicMinion
+  m_EditorClassIdentifier: 
+  _onSpawnSounds: []
+  _onDeathSounds:
+  - {fileID: 8300000, guid: 09f851b617a6afc41803dc75cda88965, type: 3}
+  - {fileID: 8300000, guid: ecfd9f5fbb1323942bbed62021049eb4, type: 3}
+  - {fileID: 8300000, guid: 4e71680bd7a5db04ea4ce12bfaf0246f, type: 3}
+  - {fileID: 8300000, guid: 30c965f19226b414bbe008e269d8f3f8, type: 3}
+  _onSelectedSounds:
+  - {fileID: 8300000, guid: 8f5f0aff1e092234e88dc1ca7be9a56d, type: 3}
+  - {fileID: 8300000, guid: fb15edc7720ceb043a763fcd5de32d2b, type: 3}
+  _onCommandSounds:
+  - {fileID: 8300000, guid: 8f5f0aff1e092234e88dc1ca7be9a56d, type: 3}
+  - {fileID: 8300000, guid: 81e19310076cc4541802559bacc19cfd, type: 3}
+  - {fileID: 8300000, guid: 39b06310be0bc064181a3705bcc1b637, type: 3}
+  _onAttackingSounds: []
+  _onDamagedSounds:
+  - {fileID: 8300000, guid: f4e5f97dbc466d34fa7875381440ad9c, type: 3}
+  - {fileID: 8300000, guid: 91ac49a9f79a7954f8efaa99b183ae58, type: 3}

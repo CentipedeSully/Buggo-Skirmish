@@ -95,8 +95,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 380754878171705138}
-  - component: {fileID: 6149967052744613547}
+  - component: {fileID: 7689499025798442365}
   - component: {fileID: -1440785022667371435}
+  - component: {fileID: 6149967052744613547}
   - component: {fileID: 3149037871196682663}
   m_Layer: 8
   m_Name: Pickup
@@ -121,6 +122,44 @@ Transform:
   - {fileID: 1067189348069878778}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7689499025798442365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8174027236502360028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c84060508c7e7db48b1752c822aa0fe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _allMeshes:
+  - {fileID: 716987570631945306}
+  _blinkableShader: {fileID: -6465566751694194690, guid: 3ffb742fb40c21f42b97475bc49b5c23, type: 3}
+  _primaryColorMeshes:
+  - {fileID: 716987570631945306}
+  _secondaryColorMeshes: []
+  _tertiaryColorMeshes: []
+--- !u!114 &-1440785022667371435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8174027236502360028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bb3862e26ca0bc4c8d73625bdd2dc5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _nutrition: 100
+  _isBeingCarried: 0
+  _isReadyToBePickedUp: 1
+  _pickupCooldown: 1.5
+  _rb: {fileID: 3149037871196682663}
+  _materialController: {fileID: 7689499025798442365}
+  _isHovered: 0
 --- !u!65 &6149967052744613547
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -142,24 +181,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 0.5, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-1440785022667371435
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8174027236502360028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7bb3862e26ca0bc4c8d73625bdd2dc5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _nutrition: 100
-  _isBeingCarried: 0
-  _isReadyToBePickedUp: 1
-  _pickupCooldown: 1.5
-  _isGravityEnabled: 1
-  _rb: {fileID: 3149037871196682663}
 --- !u!54 &3149037871196682663
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -29,6 +29,7 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     [SerializeField] private float _activationTime = 20f;
     [SerializeField] private bool _autoActivateAfterTime = false;
     private GameManager _gameManager;
+    [SerializeField] private MaterialController _materialController;
 
 
     [Header("Minion Spawn Settings")]
@@ -57,6 +58,7 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     private IEnumerator _pickupBurstSpawnManager;
 
     [Header("Visual Queue Settings")]
+    [SerializeField] private bool _isHovered = false;
     [SerializeField] private Animator _animator;
     [SerializeField] private List<MeshRenderer> _nestMeshRenderers = new();
     [SerializeField] private List<Material> _minionNestMaterials;
@@ -481,5 +483,39 @@ public class AiNestBehavior : MonoBehaviour, ITargetable, IResourcePoint
     public bool IsSpawning()
     {
         return _isSpawning;
+    }
+
+    public void OnHoverEntered()
+    {
+        if (!_isHovered)
+        {
+            _isHovered = true;
+            _materialController.ToggleBlinkingVisual(true);
+        }
+
+    }
+
+    public void OnHoverExited()
+    {
+        if (_isHovered)
+        {
+            _isHovered = false;
+            _materialController.ToggleBlinkingVisual(false);
+        }
+    }
+
+    public bool IsHovered()
+    {
+        return _isHovered;
+    }
+
+    public bool IsSelectable()
+    {
+        return true;
+    }
+
+    public void PlaySound(SoundType type)
+    {
+        //...
     }
 }

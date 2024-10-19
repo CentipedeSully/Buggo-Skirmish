@@ -22,6 +22,8 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     private bool _isDead;
     private GameManager _gameManager;
 
+    [SerializeField] private MaterialController _materialController;
+    [SerializeField] private bool _isHovered = false;
     [SerializeField] private List<MeshRenderer> _nestMeshRenderers = new();
     [SerializeField] private List<Material> _playerNestMaterials = new();
     [SerializeField] private List<Material> _nestKilledMaterials = new();
@@ -291,5 +293,39 @@ public class PlayerNestBehavior : MonoBehaviour, ITargetable
     public void SetGameManager(GameManager gm)
     {
         _gameManager = gm;
+    }
+
+    public void OnHoverEntered()
+    {
+        if (!_isHovered)
+        {
+            _isHovered = true;
+            _materialController.ToggleBlinkingVisual(true);
+        }
+
+    }
+
+    public void OnHoverExited()
+    {
+        if (_isHovered)
+        {
+            _isHovered = false;
+            _materialController.ToggleBlinkingVisual(false);
+        }
+    }
+
+    public bool IsHovered()
+    {
+        return _isHovered;
+    }
+
+    public bool IsSelectable()
+    {
+        return true;
+    }
+
+    public void PlaySound(SoundType type)
+    {
+        //...
     }
 }

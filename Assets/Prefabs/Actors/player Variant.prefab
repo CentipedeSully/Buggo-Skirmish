@@ -101,6 +101,17 @@ PrefabInstance:
       insertIndex: 1
       addedObject: {fileID: 6028751558855064469}
   m_SourcePrefab: {fileID: 100100000, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+--- !u!114 &2540269835560748466 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9058897177028620619, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+  m_PrefabInstance: {fileID: 6843064638547522809}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8408930645025004494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d064b58d567f4c6458014003446522a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &6140723855698517881 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 850978876430756736, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
@@ -139,12 +150,14 @@ MonoBehaviour:
   _playerManipulator: {fileID: 0}
   _bodyModelTransform: {fileID: 6140723855698517881}
   _rb: {fileID: 6184100191302117244}
+  _audioController: {fileID: 2540269835560748466}
   _moveSpeed: 3
   _cameraRotationSpeed: 270
   _signalRadius: 10
   _signalRadiusGizmoColor: {r: 0, g: 1, b: 0, a: 1}
   _actionCooldownDuration: 0.1
-  _bodyRotationLerpDuration: 0.3
+  _turnSpeed: 180
+  _lookAngleTolerance: 10
   _moveDirectionGizmoColor: {r: 0, g: 1, b: 1, a: 1}
   _gizmoLineLength: 5
   _activeFollowers: []
@@ -156,3 +169,5 @@ MonoBehaviour:
   _deathThrowForce: 700
   _deathThrowTorqueMax: 600
   _deathThrowTorqueMin: 300
+  _isHovered: 0
+  _materialController: {fileID: 0}

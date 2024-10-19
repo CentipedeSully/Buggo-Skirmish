@@ -64,7 +64,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 49d335ab1ae34534aa542c1533d973d2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -94,6 +94,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 656560604334589477, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 49d335ab1ae34534aa542c1533d973d2, type: 2}
+    - target: {fileID: 976144533311647346, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _meshRendererList.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 976144533311647346, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: '_meshRendererList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 3098089591963931789}
     - target: {fileID: 1722336184884299765, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: m_Size.x
       value: 1.5407293
@@ -146,6 +158,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: big Actor Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 3697224745217894541, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 49d335ab1ae34534aa542c1533d973d2, type: 2}
+    - target: {fileID: 4168536041200413153, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 49d335ab1ae34534aa542c1533d973d2, type: 2}
+    - target: {fileID: 4469592213203093315, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 49d335ab1ae34534aa542c1533d973d2, type: 2}
     - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: _damage
       value: 6

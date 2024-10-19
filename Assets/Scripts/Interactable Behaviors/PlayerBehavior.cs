@@ -18,6 +18,8 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private PlayerManipulator _playerManipulator;
     [SerializeField] private Transform _bodyModelTransform;
     [SerializeField] private Rigidbody _rb;
+    [SerializeField] private AudioController _audioController;
+
     private GameManager _gameManager;
 
     private InputAction _moveInputAction;
@@ -58,6 +60,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     [SerializeField] private float _deathThrowForce = 700;
     [SerializeField] private float _deathThrowTorqueMax = 600;
     [SerializeField] private float _deathThrowTorqueMin = 300;
+    [SerializeField] private bool _isHovered = false;
+
+    [SerializeField] private MaterialController _materialController;
 
 
 
@@ -65,7 +70,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     private void Start()
     {
         //make the player ignore the idel and move anims (they break, currently when the player turns)
-        _bodyAnimator.SetBool("isPlayer", true);
+        //_bodyAnimator.SetBool("isPlayer", true);
 
         //Collect action references
         _moveInputAction = _playerInputReference.actions.FindAction("PlayerMovement");
@@ -157,7 +162,7 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
             float signedAngle  = Vector3.SignedAngle(bodyForwardsVector, _cameraRelativeMoveDirection, Vector3.up);
 
             //Log the math, for clarity
-            Debug.Log($"Player Angle: {signedAngle}");
+            //Debug.Log($"Player Angle: {signedAngle}");
 
             //are we currently outside the specified angular tolerance
             if ( signedAngle < -_lookAngleTolerance || signedAngle > _lookAngleTolerance)
@@ -168,9 +173,18 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
                 //apply the rotation to the object
                 _bodyModelTransform.eulerAngles += additiveRotation;
             }
+
+            //animate the player's movement
+            _bodyAnimator.SetBool("isMoving", true);
             
         }
-        
+        else
+        {
+            //Exit the move animaiton
+            _bodyAnimator.SetBool("isMoving", false);
+        }
+            
+
     }
 
     private void DrawMoveDirectionGizmo()
@@ -260,8 +274,10 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
             ITargetable target = _playerManipulator.GetDetectedObject().GetComponent<ITargetable>();
 
-            //Ally? (and not ourself!)
-            if (target.GetFaction() == Faction.Ally && target.GetBehaviorID() != GetInstanceID())
+            //is the target an ALLIED, MINION? (and not ourself!)
+            if (target.GetFaction() == Faction.Ally && 
+                target.GetBehaviorID() != GetInstanceID() && 
+                target.GetInteractableType() == InteractableType.Minion) //All dead minions become pickups on death
             {
                 //get the ally's behavior
                 AiBehavior minion = target.GetGameObject().GetComponent<AiBehavior>();
@@ -271,6 +287,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
                 //add this follower to the list
                 AddMinionToFollowerList(minion);
+
+                //Make the minion vocalize a response
+                minion.PlaySound(SoundType.MinionSelectedFeedback);
             }
 
             //It isn't an ally...
@@ -287,6 +306,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
                     //Let the minion work. Remove it from the followers list
                     _activeFollowers.RemoveAt(0);
+
+                    //Make the minion vocalize a response
+                    minion.PlaySound(SoundType.MinionCommandFeedback);
                 }
             }
         }
@@ -305,6 +327,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
 
                 //Let the minion go. Remove it from the followers list
                 _activeFollowers.RemoveAt(0);
+
+                //Make the minion vocalize a response
+                minion.PlaySound(SoundType.MinionCommandFeedback);
             }
         }
     }
@@ -332,6 +357,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     private void Die()
     {
         _isDead = true;
+
+        //play a death sound
+        _audioController.PlayDeathSound();
 
         //disable the navmesh agent
         GetComponent<NavMeshAgent>().enabled = false;
@@ -416,6 +444,9 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     {
         if (!_isInvincible)
         {
+            //play damage sound
+            _audioController.PlayDamagedSound();
+
             _health -= damage;
 
             //Take damage
@@ -458,6 +489,37 @@ public class PlayerBehavior : MonoBehaviour, ITargetable
     public void SetGameManager(GameManager gm)
     {
         _gameManager = gm;
+    }
+
+    public void OnHoverEntered()
+    {
+        if (!_isHovered)
+        {
+            _isHovered = true;
+        }
+    }
+
+    public void OnHoverExited()
+    {
+        if (_isHovered)
+        {
+            _isHovered = false;
+        }
+    }
+
+    public bool IsHovered()
+    {
+        return _isHovered;
+    }
+
+    public bool IsSelectable()
+    {
+        return false;
+    }
+
+    public void PlaySound(SoundType type)
+    {
+        //...
     }
 
 

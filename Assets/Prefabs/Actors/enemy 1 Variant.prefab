@@ -32,6 +32,34 @@ PrefabInstance:
       propertyPath: _faction
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _baseColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _deathColors
+      value: 
+      objectReference: {fileID: 11400000, guid: d05681a7d2b57dc46a0fb6f0f4b30da4, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _standbyColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _fightingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _patrolingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _collectingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 4771241860692016768, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
+      propertyPath: _followingLeaderColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
     - target: {fileID: 7821277636965601953, guid: 8bc7e0c1c96109949adf847c657e382d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.31

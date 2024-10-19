@@ -33,10 +33,60 @@ public class PlayerManipulator : MonoBehaviour
         DrawMouseRaycast();
     }
 
-
+    private void Update()
+    {
+        DectectHoverables();
+    }
 
 
     //Internals
+    private void DectectHoverables()
+    {
+        //save the previous detection data
+        GameObject lastDetection = _detectedObject;
+
+        //Get new detection data
+        CastMouseRay();
+
+        //If we've detected nothing (or the ground), then exit the previous detection's hover state
+        if (_detectedObject == null || (_detectedObject != null && _isGroundDetected))
+        {
+            //does a previous detection exist?
+            if (lastDetection != null)
+            {
+                //is it NOT the ground?
+                if (!lastDetection.CompareTag("Ground"))
+                {
+                    //get its targetable behavior
+                    ITargetable lastDetectedBehavior = lastDetection.GetComponent<ITargetable>();
+
+                    //Exit the behavior's hover state (if it exists)
+                    lastDetectedBehavior?.OnHoverExited();
+                }
+            }
+        }
+
+        
+        //Else if our detection isn't the ground && the last detection is different the current one
+        else if (!_isGroundDetected && _detectedObject != lastDetection)
+        {
+            //does a previous detection exist?
+            if (lastDetection != null)
+            {
+                //get its targetable behavior
+                ITargetable lastDetectedBehavior = lastDetection.GetComponent<ITargetable>();
+
+                //Exit the behavior's hover state (if it exists)
+                lastDetectedBehavior?.OnHoverExited();
+            }
+
+            //get the new detection's behaivor
+            ITargetable newDectectionBehavior = _detectedObject.GetComponent<ITargetable>();
+
+            //enter hover on this new behavior
+            newDectectionBehavior?.OnHoverEntered();
+        }
+    }
 
     
 
@@ -85,9 +135,23 @@ public class PlayerManipulator : MonoBehaviour
             if (detection.collider.CompareTag("Actor"))
             {
                 _detectedObject = detection.collider.gameObject;
-                break;
+                return;
             }
         }
+
+        //if no actors were detected, try again and prioritize Nests detections 
+        if (_detectedObject == null)
+        {
+            foreach (RaycastHit detection in detections)
+            {
+                if (detection.collider.CompareTag("Nest"))
+                {
+                    _detectedObject = detection.collider.gameObject;
+                    return;
+                }
+            }
+        }
+        
 
         //if no actors were detected, try again and prioritize finding pickups
         if (_detectedObject == null)
@@ -97,7 +161,7 @@ public class PlayerManipulator : MonoBehaviour
                 if (detection.collider.CompareTag("Pickup"))
                 {
                     _detectedObject = detection.collider.gameObject;
-                    break;
+                    return;
                 }
             }
         }
@@ -115,7 +179,7 @@ public class PlayerManipulator : MonoBehaviour
                     //save the contact point
                     _isGroundDetected = true;
                     _detectedGroundPosition = detection.point;
-                    break;
+                    return;
                 }
             }
         }

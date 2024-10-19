@@ -52,6 +52,34 @@ PrefabInstance:
       propertyPath: _faction
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _baseColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _deathColors
+      value: 
+      objectReference: {fileID: 11400000, guid: d05681a7d2b57dc46a0fb6f0f4b30da4, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _standbyColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _fightingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _patrolingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _collectingColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
+    - target: {fileID: 2467345846921189503, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
+      propertyPath: _followingLeaderColors
+      value: 
+      objectReference: {fileID: 11400000, guid: 44a4ce5117eed8e4cb8aa39a0e11241a, type: 2}
     - target: {fileID: 3098089591963931789, guid: 968cbca47e6415a4b8e6fd1956c92bb1, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
