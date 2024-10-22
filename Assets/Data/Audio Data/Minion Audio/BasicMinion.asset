@@ -12,20 +12,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d947782397bcce744b74d2983b4ddae9, type: 3}
   m_Name: BasicMinion
   m_EditorClassIdentifier: 
-  _onSpawnSounds: []
-  _onDeathSounds:
-  - {fileID: 8300000, guid: 09f851b617a6afc41803dc75cda88965, type: 3}
-  - {fileID: 8300000, guid: ecfd9f5fbb1323942bbed62021049eb4, type: 3}
-  - {fileID: 8300000, guid: 4e71680bd7a5db04ea4ce12bfaf0246f, type: 3}
-  - {fileID: 8300000, guid: 30c965f19226b414bbe008e269d8f3f8, type: 3}
-  _onSelectedSounds:
-  - {fileID: 8300000, guid: 8f5f0aff1e092234e88dc1ca7be9a56d, type: 3}
-  - {fileID: 8300000, guid: fb15edc7720ceb043a763fcd5de32d2b, type: 3}
-  _onCommandSounds:
-  - {fileID: 8300000, guid: 8f5f0aff1e092234e88dc1ca7be9a56d, type: 3}
-  - {fileID: 8300000, guid: 81e19310076cc4541802559bacc19cfd, type: 3}
-  - {fileID: 8300000, guid: 39b06310be0bc064181a3705bcc1b637, type: 3}
-  _onAttackingSounds: []
-  _onDamagedSounds:
-  - {fileID: 8300000, guid: f4e5f97dbc466d34fa7875381440ad9c, type: 3}
-  - {fileID: 8300000, guid: 91ac49a9f79a7954f8efaa99b183ae58, type: 3}
+  _spawnSounds:
+  - {fileID: 8300000, guid: 5ea79b72e6944ab499eba69bf36f965e, type: 3}
+  - {fileID: 8300000, guid: 20bc8966cc9b6c148862b827d98f1740, type: 3}
+  - {fileID: 8300000, guid: dd05111bb8c926745bfb390c59d6e2c5, type: 3}
+  _deathSounds:
+  - {fileID: 8300000, guid: 5b903690a5f945243a1f59e21589cf36, type: 3}
+  - {fileID: 8300000, guid: c1540da35619a9643b4831fc9533e2ef, type: 3}
+  - {fileID: 8300000, guid: b26ba214b73ec3148bf310d80cd3488a, type: 3}
+  _selectedSounds:
+  - {fileID: 8300000, guid: d8cb586975fc0df45aa4f6c9a7a78419, type: 3}
+  _responseSounds:
+  - {fileID: 8300000, guid: cda7c60cc654aca4f99e7cb135d92510, type: 3}
+  - {fileID: 8300000, guid: ad1f095ae4d00074cbba47ed99fe3ac7, type: 3}
+  _hostileResponseSounds:
+  - {fileID: 8300000, guid: 65da2fe0d7694884f916e1e694ae6cbf, type: 3}
+  - {fileID: 8300000, guid: ad383427a23924947b508a0ffd5f1c0a, type: 3}
+  - {fileID: 8300000, guid: eeaf5658c3862e64485618d5e3d454b1, type: 3}
+  _attackSounds:
+  - {fileID: 8300000, guid: 18b902728081561439c58ff3ab7676d4, type: 3}
+  - {fileID: 8300000, guid: ad383a3f28ff59e47a453fd28f696f83, type: 3}
+  - {fileID: 8300000, guid: 39df7882b373f39469a11e62161d1017, type: 3}
+  _damagedSounds:
+  - {fileID: 8300000, guid: d7f9bc2ec31fda94b82b300a887b6859, type: 3}
+  - {fileID: 8300000, guid: 2d5b16f22952a394cae02392c63aa0cf, type: 3}
+  _footstepSounds:
+  - {fileID: 8300000, guid: 0203f760bb1c80c4495044783b864102, type: 3}
+  - {fileID: 8300000, guid: 553d866fd6fcbf347a64093015c89b1b, type: 3}
+  - {fileID: 8300000, guid: 84e4521e09b5f514c9bb59c92000e467, type: 3}
+  - {fileID: 8300000, guid: 8ce56acea88c57c49b11d13ddaa4accb, type: 3}
+  _pickupSounds:
+  - {fileID: 8300000, guid: 11bfc21a731ea1a4faa0d2aaf31417bc, type: 3}
+  - {fileID: 8300000, guid: 84e4521e09b5f514c9bb59c92000e467, type: 3}
+  - {fileID: 8300000, guid: 3405f4fe46da25f4380d5661f9c284ef, type: 3}
+  _dropItemSounds: []
+  _bodyFlopSounds:
+  - {fileID: 8300000, guid: 6e20e15e9ff72cc47b70d2f872a5655c, type: 3}
+  _ambienceSounds:
+  - {fileID: 8300000, guid: db0e3af3bddc963439c6eb226be3ef8f, type: 3}
+  - {fileID: 8300000, guid: 0cb0a82f96d0ca6438007602a390a662, type: 3}
+  - {fileID: 8300000, guid: f391c5365d897b244babf3f145b52fd7, type: 3}
+  - {fileID: 8300000, guid: efb28915ede51804c9a93b7c1e158147, type: 3}
+  - {fileID: 8300000, guid: 59dc137c1079611489647f4f4fc27cd8, type: 3}
+  - {fileID: 8300000, guid: 2ff752923b3a6af4e9c9f9c3c547ab8e, type: 3}
+  - {fileID: 8300000, guid: f682bf18819e7dd48bd19a958a2c8587, type: 3}
+  - {fileID: 8300000, guid: a2482923d65892344a91148eec735758, type: 3}
+  - {fileID: 8300000, guid: 99a3676aa813a5e49a120cdb8d9e56e2, type: 3}
+  _crunchButcherSounds:
+  - {fileID: 8300000, guid: 3da916bf4358ba248b2298479da73c5b, type: 3}
+  - {fileID: 8300000, guid: fd400ecbbaa3a274da004dec58e8093f, type: 3}
+  - {fileID: 8300000, guid: c20410fa4a5c45346aa3c38277c4304b, type: 3}
+  _meatButcherSounds:
+  - {fileID: 8300000, guid: c1540da35619a9643b4831fc9533e2ef, type: 3}
+  - {fileID: 8300000, guid: 958d54bc23cb83a4495e648a103a1180, type: 3}

@@ -20,100 +20,150 @@ public class AudioController : MonoBehaviour
     [SerializeField] private AudioSource _feetAudioSource;
     [SerializeField] private AudioSource _bodyAudioSource;
     [SerializeField] private AudioSource _voiceAudioSource;
+    [SerializeField] private AudioSource _ambienceAudioSource;
+    [SerializeField] private float _randomizedPitch;
 
 
 
     //Monobehaviours
-
+    private void Start()
+    {
+        _randomizedPitch = Random.Range(.9f, 1.1f);
+        _feetAudioSource.pitch = _randomizedPitch;
+        _bodyAudioSource.pitch = _randomizedPitch;
+        _voiceAudioSource.pitch = _randomizedPitch;
+        _ambienceAudioSource.pitch = _randomizedPitch;
+    }
 
 
 
     //Internals
-    
+
 
 
 
     //Externals
     public void PlaySpawnSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnSpawnedClip();
-        if (randomSpawnClip != null)
+        AudioClip clip = _minionAudio.GetSpawnAudioClip();
+
+        if (clip != null)
         {
-            _bodyAudioSource.clip = randomSpawnClip;
-            _bodyAudioSource.Play();
+            _bodyAudioSource.PlayOneShot(clip);
         }
     }
-
     public void PlayDeathSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnDeathClip();
-        if (randomSpawnClip != null)
+        AudioClip clip = _minionAudio.GetDeathAudioClip();
+
+        if (clip != null)
         {
             if (_voiceAudioSource.isPlaying)
                 _voiceAudioSource.Stop();
 
-            _voiceAudioSource.clip = randomSpawnClip;
+            _voiceAudioSource.clip = clip;
             _voiceAudioSource.Play();
         }
     }
-
     public void PlaySelectedSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnSelectedClip();
-        if (randomSpawnClip != null)
+        AudioClip clip = _minionAudio.GetSelectedAudioClip();
+
+        if (clip != null)
         {
             if (_voiceAudioSource.isPlaying)
                 _voiceAudioSource.Stop();
 
-            _voiceAudioSource.clip = randomSpawnClip;
+            _voiceAudioSource.clip = clip;
             _voiceAudioSource.Play();
         }
     }
-    public void PlayCommandedSound()
+    public void PlayResponseSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnCommandedClip();
-        if (randomSpawnClip != null)
+        AudioClip clip = _minionAudio.GetResponseAudioClip();
+
+        if (clip != null)
         {
             if (_voiceAudioSource.isPlaying)
                 _voiceAudioSource.Stop();
 
-            _voiceAudioSource.clip = randomSpawnClip;
+            _voiceAudioSource.clip = clip;
             _voiceAudioSource.Play();
         }
     }
+    public void PlayHostileResponseSound()
+    {
+        AudioClip clip = _minionAudio.GetHostileResponseAudioClip();
 
+        if (clip != null)
+        {
+            if (_voiceAudioSource.isPlaying)
+                _voiceAudioSource.Stop();
+
+            _voiceAudioSource.clip = clip;
+            _voiceAudioSource.Play();
+        }
+    }
     public void PlayAttackingSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnAttackingClip();
-        if (randomSpawnClip != null)
+        AudioClip clip = _minionAudio.GetAttackAudioClip();
+
+        if (clip != null)
         {
             if (_voiceAudioSource.isPlaying)
                 _voiceAudioSource.Stop();
 
-            _voiceAudioSource.clip = randomSpawnClip;
+            _voiceAudioSource.clip = clip;
             _voiceAudioSource.Play();
         }
     }
-
     public void PlayDamagedSound()
     {
-        AudioClip randomSpawnClip = _minionAudio.OnDamagedClip();
-        if (randomSpawnClip != null)
-        {
-            if (_bodyAudioSource.isPlaying)
-                _voiceAudioSource.Stop();
+        AudioClip clip = _minionAudio.GetDamagedAudioClip();
 
-            _bodyAudioSource.clip = randomSpawnClip;
-            _bodyAudioSource.Play();
+        if (clip != null)
+        {
+            _bodyAudioSource.PlayOneShot(clip);
+        }
+    }
+    public void PlayFootstepSound()
+    {
+        AudioClip clip = _minionAudio.GetFootstepAudioClip();
+
+        if (clip != null)
+        {
+            _feetAudioSource.PlayOneShot(clip);
+        }
+    }
+    public void PlayAmbienceSound()
+    {
+        AudioClip clip = _minionAudio.GetAmbienceAudioClip();
+
+        if (clip != null)
+        {
+            _ambienceAudioSource.PlayOneShot(clip);
         }
     }
 
-    /*
-    public void PlayFootstepSound()
+    public void PlayPickupSound()
     {
-        //...
+        AudioClip clip = _minionAudio.GetPickingUpAudioClip();
+
+        if (clip != null)
+        {
+            _voiceAudioSource.PlayOneShot(clip);
+        }
     }
-    */
+
+    public void PlayBodyFlopSound()
+    {
+        AudioClip clip = _minionAudio.GetBodyFlopAudioClip();
+
+        if (clip != null)
+        {
+            _bodyAudioSource.PlayOneShot(clip);
+        }
+    }
 
 
 

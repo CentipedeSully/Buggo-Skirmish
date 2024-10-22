@@ -1344,7 +1344,7 @@ public class AiBehavior : MonoBehaviour, ITargetable
             switch (type)
             {
                 case SoundType.MinionCommandFeedback:
-                    _audioController.PlayCommandedSound();
+                    _audioController.PlayResponseSound();
                     break;
 
                 case SoundType.MinionSelectedFeedback:
