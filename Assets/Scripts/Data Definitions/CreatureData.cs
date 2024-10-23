@@ -27,6 +27,7 @@ public class CreatureData : ScriptableObject
     [Header("Combat Data")]
     [SerializeField] private int _baseHealth = 5;
     [SerializeField] private int _baseDamage = 1;
+    [SerializeField] private float _baseAtkCooldown = .5f;
 
     [Header("Resource Data")]
     [SerializeField] private int _baseMeatValue = 1;
@@ -60,6 +61,7 @@ public class CreatureData : ScriptableObject
     #region CombatUtilities
     public int GetBaseHealth() { return _baseHealth; }
     public int GetBaseDamage() { return _baseDamage; }
+    public float GetBaseAtkCooldown() { return _baseAtkCooldown; }
     #endregion
 
     #region ResourceUtilities
