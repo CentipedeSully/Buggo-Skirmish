@@ -28,7 +28,7 @@ public enum InteractableType
 
 public enum Faction
 {
-    NotApplicable,
+    unset,
     Neutral,
     Ally,
     Enemy

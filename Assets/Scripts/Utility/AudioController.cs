@@ -144,7 +144,6 @@ public class AudioController : MonoBehaviour
             _ambienceAudioSource.PlayOneShot(clip);
         }
     }
-
     public void PlayPickupSound()
     {
         AudioClip clip = _minionAudio.GetPickingUpAudioClip();
@@ -154,7 +153,6 @@ public class AudioController : MonoBehaviour
             _voiceAudioSource.PlayOneShot(clip);
         }
     }
-
     public void PlayBodyFlopSound()
     {
         AudioClip clip = _minionAudio.GetBodyFlopAudioClip();

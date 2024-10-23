@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 7821277636965601953}
   - component: {fileID: 3430762147797213163}
   - component: {fileID: 9058897177028620619}
-  - component: {fileID: 4771241860692016768}
+  - component: {fileID: 3112593463184157788}
   - component: {fileID: 2838942970441888320}
   - component: {fileID: 1722336184884299765}
   - component: {fileID: 803089149892858757}
@@ -296,7 +296,9 @@ MonoBehaviour:
   _feetAudioSource: {fileID: 0}
   _bodyAudioSource: {fileID: 8412167450045982040}
   _voiceAudioSource: {fileID: 4991536214078443196}
---- !u!114 &4771241860692016768
+  _ambienceAudioSource: {fileID: 0}
+  _randomizedPitch: 0
+--- !u!114 &3112593463184157788
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -305,16 +307,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 3046112125697519415}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a81b063a05e949b448ca8968f200b40f, type: 3}
+  m_Script: {fileID: 11500000, guid: 89ed3d7b6f615494c90340ff98698898, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _carryParent: {fileID: 3944319591578894396}
-  _selfAgent: {fileID: 2838942970441888320}
-  _headAnimator: {fileID: 9204637591340499638}
-  _bodyAnimator: {fileID: 3776057667474881949}
-  _rb: {fileID: 803089149892858757}
-  _materialController: {fileID: 3430762147797213163}
-  _audioController: {fileID: 9058897177028620619}
+  _carryParent: {fileID: 0}
+  _selfAgent: {fileID: 0}
+  _headAnimator: {fileID: 0}
+  _bodyAnimator: {fileID: 0}
+  _rb: {fileID: 0}
+  _materialController: {fileID: 0}
+  _audioController: {fileID: 0}
   _baseColors: {fileID: 0}
   _deathColors: {fileID: 0}
   _standbyColors: {fileID: 0}
@@ -324,21 +326,21 @@ MonoBehaviour:
   _followingLeaderColors: {fileID: 0}
   _interactableType: 2
   _faction: 0
-  _onDeathThrowForceMin: 300
-  _onDeathThrowForceMax: 600
-  _onDeathThrowTorqueMin: 100
-  _onDeathThrowTorqueMax: 300
-  _interactionRange: 2.5
-  _nutrition: 50
-  _interactableDetectionRange: 6
-  _autoFollowLeaderRange: 3
+  _onDeathThrowForceMin: 0
+  _onDeathThrowForceMax: 0
+  _onDeathThrowTorqueMin: 0
+  _onDeathThrowTorqueMax: 0
+  _interactionRange: 0.5
+  _nutrition: 34
+  _interactableDetectionRange: 4
+  _autoFollowLeaderRange: 1
   _interactableRangeGizmoColor: {r: 1, g: 1, b: 1, a: 1}
   _autoFollowLeaderRangeGizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _showLeaderDetectionGizmo: 0
   _showInteractableDetectionGizmo: 0
   _interactableLayerMask:
     serializedVersion: 2
-    m_Bits: 896
+    m_Bits: 0
   _leaderObject: {fileID: 0}
   _nestObject: {fileID: 0}
   _isHovered: 0
@@ -356,16 +358,16 @@ MonoBehaviour:
   _damage: 2
   _atkCooldown: 0.5
   _isAtkReady: 1
-  _atkCastRadius: 0.5
-  _atkCastOffset: {fileID: 439391620910589018}
+  _atkCastRadius: 2
+  _atkCastOffset: {fileID: 0}
   _atkRangeGizmoColor: {r: 1, g: 0, b: 0, a: 1}
-  _showAtkRangeGizmo: 1
+  _showAtkRangeGizmo: 0
   _atkAlignmentTolerance: 10
   _alignmentRotationSpeed: 90
   _showAtkAlignmentRays: 0
-  _atkAnimDuration: 0.5
-  _atkCastRelativeStartTime: 0.35
-  _atkCastDuration: 0.1
+  _atkAnimDuration: 0
+  _atkCastRelativeStartTime: 0
+  _atkCastDuration: 0.2
   _isAttacking: 0
   _damagedAnimResetDelay: 0.1
   _invincTimeAfterHit: 0.1
