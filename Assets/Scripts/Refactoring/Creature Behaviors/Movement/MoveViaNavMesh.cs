@@ -11,15 +11,20 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _turnSpeed;
     private NavMeshAgent _navAgent;
+    private CommunicateDisplacementToFeet _feetDisplacer;
 
 
     //Monobehaviours
     private void Awake()
     {
         _navAgent = GetComponent<NavMeshAgent>();
+        _feetDisplacer =GetComponent<CommunicateDisplacementToFeet>();
     }
 
-
+    private void Update()
+    {
+        CommunicateWithFeetDisplacer();
+    }
 
 
     //Internals
@@ -49,6 +54,11 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
         //pass
     }
 
+    private void CommunicateWithFeetDisplacer()
+    {
+        if (_navAgent.velocity.magnitude > 0 && _feetDisplacer != null )
+            _feetDisplacer.MoveFeetViaDisplacement(_navAgent.velocity);
+    }
 
 
     //Externals

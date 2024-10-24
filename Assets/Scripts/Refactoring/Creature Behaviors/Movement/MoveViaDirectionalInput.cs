@@ -37,6 +37,7 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
     [SerializeField] private Camera _shoulderCam;
     [SerializeField] private Transform _cameraPivot;
     private Rigidbody _rigidbody;
+    private CommunicateDisplacementToFeet _feetDisplacer;
     private InputAction _moveInputAction;
     private InputAction _mouseMovementInputAction;
 
@@ -68,6 +69,7 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
     private void InitializeReferences()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        _feetDisplacer = GetComponent<CommunicateDisplacementToFeet>();
 
         //Collect action references
         _moveInputAction = _playerInputReference.actions.FindAction("PlayerMovement");
@@ -141,6 +143,10 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
             //move the player
             transform.Translate(_moveSpeed * Time.deltaTime * _cameraRelativeMoveDirection);
 
+            //Move the feets, too!
+            if (_feetDisplacer != null)
+                _feetDisplacer.MoveFeetViaDisplacement(_moveSpeed * Time.deltaTime * _cameraRelativeMoveDirection);
+
             //calculate the angle from the body forwards to themove vector
             float signedAngle = Vector3.SignedAngle(bodyForwardsVector, _cameraRelativeMoveDirection, Vector3.up);
 
@@ -163,6 +169,7 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
             _isMoving = false;
         }
     }
+
 
 
 
