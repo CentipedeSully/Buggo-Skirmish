@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6541445917778611595}
-  - component: {fileID: 6745385347115744748}
+  - component: {fileID: 2600976563263702259}
   - component: {fileID: 6040948522068848497}
+  - component: {fileID: 2475331143938491577}
   - component: {fileID: 8919526312116322348}
   - component: {fileID: 7386015290822767543}
   - component: {fileID: 3699985054397795214}
@@ -37,7 +38,7 @@ Transform:
   - {fileID: 7382985178763855494}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6745385347115744748
+--- !u!114 &2600976563263702259
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -46,7 +47,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 420488035087495490}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbb1640f7e4eb574f8a0e124f787a2ac, type: 3}
+  m_Script: {fileID: 11500000, guid: 72bb055768c05bf4ebb5af63dc5ddaef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _creatureData: {fileID: 11400000, guid: 0c99bba757231474094c463cd2be6671, type: 2}
@@ -79,6 +80,25 @@ MonoBehaviour:
   _bodyModelTransform: {fileID: 7382985178763855494}
   _shoulderCam: {fileID: 0}
   _cameraPivot: {fileID: 0}
+--- !u!114 &2475331143938491577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420488035087495490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b77248ae1500334fb4705bba57ce94a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHealth: 0
+  _currentHealth: 0
+  _isDead: 0
+  _invincTimeAfterHit: 0
+  _data: {fileID: 0}
+  _damageInterruptsAttacks: 1
+  _damageDropsItems: 1
 --- !u!114 &8919526312116322348
 MonoBehaviour:
   m_ObjectHideFlags: 0

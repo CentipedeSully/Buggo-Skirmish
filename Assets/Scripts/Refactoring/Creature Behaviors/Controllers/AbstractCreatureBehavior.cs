@@ -21,7 +21,7 @@ public interface ICreatureController
 {
     public GameObject GetGameObject();
 
-    public int GetControllerID();
+    public int GetEntityID();
 
     public string GetControllerName();
 
@@ -33,71 +33,64 @@ public interface ICreatureController
 
     public bool IsDead();
 
+    public void SignalDeath();
+
 }
 
 
 
-public abstract class AbstractCreatureBehavior : MonoBehaviour, ICreatureController
+public abstract class AbstractCreatureBehavior : AbstractController, ICreatureController
 {
     //Declarations
-    [TabGroup("Creature Behavior","Setup")]
+    [BoxGroup("Creature Setup")]
     [SerializeField] protected CreatureData _creatureData;
 
-    [TabGroup("Creature Behavior", "Info")]
+    [BoxGroup("Creature Info")]
     [SerializeField] protected CreatureState _state;
 
-    [TabGroup("Creature Behavior", "Info")]
-    [SerializeField] protected Faction _faction;
-
-    [TabGroup("Creature Behavior", "Info")]
+    [BoxGroup("Creature Info")]
     [SerializeField] protected CreatureType _type;
 
-    [TabGroup("Creature Behavior", "Info")]
-    [SerializeField] protected bool _isDead = false;
-
-    [TabGroup("Creature Behavior", "Debug")]
+    [BoxGroup("Debug")]
     [SerializeField] protected bool _isDebugActive = false;
 
 
 
 
     //Monobehaviours
-    private void Awake()
-    {
-        InitializeReferences();
-        InitializeCreatureBehaviors();
-    }
 
 
 
 
     //Internals
-    protected virtual void InitializeReferences()
+    protected override void InitializeOtherUtilities()
+    {
+        //Use the parent's Awake to initialize this object's references
+        InitializeCreatureReferences();
+        InitializeCreatureBehaviors();
+    }
+    protected virtual void InitializeCreatureReferences()
     {
         _type = _creatureData.GetCreatureType();
     }
     protected void InitializeCreatureBehaviors()
     {
         foreach (ICreatureBehavior behaviour in GetComponents<ICreatureBehavior>())
-        {
             behaviour.ReadCreatureData(_creatureData);
-        }
+    }
+    protected void InterruptCreatureBehaviors()
+    {
+        foreach (ICreatureBehavior creatureBehavior in GetComponents<ICreatureBehavior>())
+            creatureBehavior.InterruptBehavior();
+    }
+    protected override void ApplyOtherReactionToDeath()
+    {
+        InterruptCreatureBehaviors();
     }
 
 
-
     //Externals
-    public int GetControllerID() {return GetInstanceID();}
-
-    public string GetControllerName() {return name;}
-
-    public Faction GetFaction() { return _faction;}
-
     public CreatureType GetCreatureType() {return _type;}
-
-    public GameObject GetGameObject() { return GetGameObject();}
-
-    public bool IsDead() { return _isDead;}
 
     public CreatureState GetCurrentCreatureState() { return _state;}
 

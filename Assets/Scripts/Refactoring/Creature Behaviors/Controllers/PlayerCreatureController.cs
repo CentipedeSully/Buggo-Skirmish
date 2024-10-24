@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerController : AbstractCreatureBehavior
+public class PlayerCreatureController : AbstractCreatureBehavior
 {
     //Declarations
 

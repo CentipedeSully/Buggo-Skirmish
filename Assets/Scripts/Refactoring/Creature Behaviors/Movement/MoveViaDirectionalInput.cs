@@ -183,4 +183,9 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
         _moveSpeed = data.GetBaseMoveSpeed();
         _turnSpeed = data.GetBaseTurnSpeed();
     }
+
+    public void InterruptBehavior()
+    {
+        throw new System.NotImplementedException();
+    }
 }

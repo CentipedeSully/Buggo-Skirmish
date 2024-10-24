@@ -12,6 +12,8 @@ public interface IAttackBehaviour
     bool IsAttacking();
 }
 
+
+
 public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
 {
     //Declarations
@@ -43,6 +45,8 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
     [TabGroup("Bite Attack", "Info")]
     [SerializeField] private GameObject _currentTargetObject;
     [TabGroup("Bite Attack", "Info")]
+    [SerializeField] private int _currentTargetID;
+    [TabGroup("Bite Attack", "Info")]
     [SerializeField] private bool _isAtkReady = true;
     [TabGroup("Bite Attack", "Info")]
     [SerializeField] private bool _isAttacking = false;
@@ -51,7 +55,7 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
     [TabGroup("Bite Attack", "Info")]
     [SerializeField] private float _atkCooldown = .5f;
 
-
+    
     private float _alignmentRotationSpeed = 90;
     private IEnumerator _atkSequence = null;
     private float _atkCastStartTime;
@@ -164,10 +168,11 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
             foreach (Collider detection in detections)
             {
                 //has our target been detected?
-                if (detection.gameObject == _currentTargetObject)
+                if (detection.GetComponent<IEntityID>().GetEntityID() == _currentTargetID)
                 {
                     //Damage the target
-                    //_targetInterface.TakeDamage(this, _damage);
+                    ///Idea
+                    ///Have every collider that's attackable have a HealthBehavior that references an EntityID
 
                     //cancel any timers that're counting the duration of this cast
                     CancelInvoke(nameof(EndAttackCast));
@@ -281,10 +286,23 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
     [Button]
     public void SetTarget(GameObject newTarget)
     {
-        if (_isAttacking)
-            InterruptAttack();
+        //ignore blank targets
+        if (newTarget != null)
+        {
 
-        _currentTargetObject = newTarget;
+            IEntityController controller = newTarget.GetComponent<IEntityController>();
+
+            //only target objects with controllers. Do this to get their controllerID. Used for atttack casting.
+            if (controller != null)
+            {
+                if (_isAttacking)
+                    InterruptAttack();
+
+                _currentTargetObject = newTarget;
+                _currentTargetID = controller.GetEntityID();
+            }
+        }
+        
     }
 
     [TabGroup("Bite Attack", "Debug")]
@@ -300,4 +318,9 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
     public GameObject GetCurrentTarget() {return _currentTargetObject;}
 
     public bool IsAttacking() { return _isAttacking;}
+
+    public void InterruptBehavior()
+    {
+        InterruptAttack();
+    }
 }

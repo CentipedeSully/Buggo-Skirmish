@@ -11,6 +11,7 @@ public class CoreMinionAi : AbstractCreatureBehavior
 {
     //Declarations
     private IAiMoveBehavior _moveBehavior;
+    private IAttackBehaviour _attackBehavior;
 
 
 
@@ -20,33 +21,39 @@ public class CoreMinionAi : AbstractCreatureBehavior
 
 
     //Internals
-    protected override void  InitializeReferences()
+    protected override void  InitializeCreatureReferences()
     {
-        base.InitializeReferences();
+        base.InitializeCreatureReferences();
         _moveBehavior = GetComponent<IAiMoveBehavior>();
+        _attackBehavior = GetComponent<IAttackBehaviour>();
     }
 
 
-
     //Externals
-    [TabGroup("Creature Behavior", "Debug")]
+    [BoxGroup("Debug")]
     [Button]
     public void MoveToPosition(Vector3 position)
     {
         _moveBehavior.MoveToLocation(position);
     }
 
-    [TabGroup("Creature Behavior", "Debug")]
+    [BoxGroup("Debug")]
     [Button]
-    public void ApproachTarget(Transform target)
+    public void ApproachObject(Transform target)
     {
-        _moveBehavior.ApproachTarget(target);
+        _moveBehavior.ApproachObject(target);
     }
 
-    [TabGroup("Creature Behavior", "Debug")]
+    [BoxGroup("Debug")]
     [Button]
     public void CancelMovement()
     {
         _moveBehavior.ClearCurrentMovement();
+    }
+
+    protected override void ApplyOtherReactionToAwaken()
+    {
+        
+        //pass
     }
 }

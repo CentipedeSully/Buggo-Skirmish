@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6745385347115744748}
   - component: {fileID: 7278290568149296042}
   - component: {fileID: 7657371366143646137}
+  - component: {fileID: 5667215281668748393}
   - component: {fileID: 4208903702285100606}
   - component: {fileID: 6808936925571856432}
   - component: {fileID: 3699985054397795214}
@@ -105,6 +106,25 @@ MonoBehaviour:
   _isMoving: 0
   _moveSpeed: 0
   _turnSpeed: 0
+--- !u!114 &5667215281668748393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420488035087495490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b77248ae1500334fb4705bba57ce94a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxHealth: 0
+  _currentHealth: 0
+  _isDead: 0
+  _invincTimeAfterHit: 0
+  _data: {fileID: 0}
+  _damageInterruptsAttacks: 1
+  _damageDropsItems: 1
 --- !u!114 &4208903702285100606
 MonoBehaviour:
   m_ObjectHideFlags: 0

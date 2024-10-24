@@ -10,7 +10,7 @@ public interface IAiMoveBehavior
     bool IsMoving();
     void ClearCurrentMovement();
     void MoveToLocation(Vector3 position);
-    void ApproachTarget(Transform target);
+    void ApproachObject(Transform target);
 
 }
 
@@ -87,7 +87,7 @@ public abstract class AbstractAiMoveBehavior : MonoBehaviour, IAiMoveBehavior, I
 
 
     //Externals
-    public virtual void ApproachTarget(Transform target)
+    public virtual void ApproachObject(Transform target)
     {
         //ignore null and duplicate targets
         if (target != null && _currentTarget != target)
@@ -129,4 +129,9 @@ public abstract class AbstractAiMoveBehavior : MonoBehaviour, IAiMoveBehavior, I
     }
 
     public abstract void ReadCreatureData(CreatureData data);
+
+    public void InterruptBehavior()
+    {
+        ClearCurrentMovement();
+    }
 }

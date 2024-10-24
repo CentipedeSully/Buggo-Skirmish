@@ -11,6 +11,8 @@ public enum CreatureType
 public interface ICreatureBehavior
 {
     void ReadCreatureData(CreatureData data);
+
+    void InterruptBehavior();
 }
 
 
