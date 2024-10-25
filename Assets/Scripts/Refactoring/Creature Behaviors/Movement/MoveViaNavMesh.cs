@@ -11,19 +11,19 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _turnSpeed;
     private NavMeshAgent _navAgent;
-    private CommunicateDisplacementToFeet _feetDisplacer;
+    private CommunicateMovementToAnimators _animatorCommunicator;
 
 
     //Monobehaviours
     private void Awake()
     {
         _navAgent = GetComponent<NavMeshAgent>();
-        _feetDisplacer =GetComponent<CommunicateDisplacementToFeet>();
+        _animatorCommunicator =GetComponent<CommunicateMovementToAnimators>();
     }
 
     private void Update()
     {
-        CommunicateWithFeetDisplacer();
+        CommunicateMovementToAnimator();
     }
 
 
@@ -32,6 +32,8 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
     {
         _navAgent.isStopped = true;
         _navAgent.ResetPath();
+
+        EndAnimatorMovement();
     }
 
     protected override void SetupOtherDestinationMoveUtils()
@@ -54,10 +56,23 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
         //pass
     }
 
-    private void CommunicateWithFeetDisplacer()
+    private void CommunicateMovementToAnimator()
     {
-        if (_navAgent.velocity.magnitude > 0 && _feetDisplacer != null )
-            _feetDisplacer.MoveFeetViaDisplacement(_navAgent.velocity);
+        if (_animatorCommunicator != null)
+        {
+            //move feets
+            if (_navAgent.velocity.magnitude > 0)
+                _animatorCommunicator.MoveFeetViaDisplacement(_navAgent.velocity);
+
+            //turn head
+            _animatorCommunicator.TurnHead(_navAgent.velocity);
+        }
+        
+    }
+    private void EndAnimatorMovement()
+    {
+        if (_animatorCommunicator != null)
+            _animatorCommunicator.StopTurningHead();
     }
 
 

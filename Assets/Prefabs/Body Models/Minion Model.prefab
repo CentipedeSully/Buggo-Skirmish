@@ -505,10 +505,11 @@ GameObject:
   - component: {fileID: 746381470811239331}
   - component: {fileID: 1915419646265421929}
   - component: {fileID: 1507519733087990010}
+  - component: {fileID: 1188258984333141544}
   - component: {fileID: 2543679905172030087}
   m_Layer: 7
   m_Name: Head
-  m_TagString: Untagged
+  m_TagString: Actor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -583,6 +584,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1188258984333141544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644609018589246118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe543ba503f163a418d083378fa20df9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _entityID: 0
 --- !u!65 &2543679905172030087
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -858,6 +872,7 @@ GameObject:
   - component: {fileID: 4503920583175545941}
   - component: {fileID: 5618363188945648916}
   - component: {fileID: 9180940825826615655}
+  - component: {fileID: 7394590542403126083}
   - component: {fileID: 373986873598581921}
   m_Layer: 7
   m_Name: Booty
@@ -936,6 +951,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7394590542403126083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3503727097737761502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe543ba503f163a418d083378fa20df9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _entityID: 0
 --- !u!65 &373986873598581921
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -966,7 +994,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5393756125534672142}
-  m_Layer: 0
+  - component: {fileID: 3334126911223742543}
+  m_Layer: 7
   m_Name: Head Connection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -989,6 +1018,24 @@ Transform:
   - {fileID: 746381470811239331}
   m_Father: {fileID: 4828504803202077511}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3334126911223742543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3919106549209323722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47868c73d9a6f3543a5c82355fcf2074, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bodyTransform: {fileID: 4828504803202077511}
+  _turnSpeed: 120
+  _maxTurnRotation: 60
+  _angleTolerance: 0.5
+  _headRayColor: {r: 1, g: 0, b: 0, a: 1}
+  _bodyRayColor: {r: 1, g: 0, b: 1, a: 1}
 --- !u!1 &4081233336315749516
 GameObject:
   m_ObjectHideFlags: 0
@@ -1444,10 +1491,11 @@ GameObject:
   - component: {fileID: 4828504803202077511}
   - component: {fileID: 2202950787124287075}
   - component: {fileID: 4451332134654207600}
+  - component: {fileID: 6303988844972666514}
   - component: {fileID: 5952487567806961603}
   m_Layer: 7
   m_Name: Mid
-  m_TagString: Untagged
+  m_TagString: Actor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1523,6 +1571,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6303988844972666514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7373234463774620918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe543ba503f163a418d083378fa20df9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _entityID: 0
 --- !u!65 &5952487567806961603
 BoxCollider:
   m_ObjectHideFlags: 0

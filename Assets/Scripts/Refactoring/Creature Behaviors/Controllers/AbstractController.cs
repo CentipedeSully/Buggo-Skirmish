@@ -1,5 +1,6 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
+using System.Collections.Generic;
 
 
 
@@ -28,35 +29,52 @@ public interface IEntityID
     public int GetEntityID();
 
     public GameObject GetGameObject();
+
+    public IHealthBehavior GetHealthBehavior();
 }
 
 
 public abstract class AbstractController : MonoBehaviour, IEntityController, IEntityID
 {
     //Declarations
-    [BoxGroup("Entity Controller Data")]
+    [TabGroup("Entity Controller", "Setup")]
+    [SerializeField] private List<EntityIdentifier> _remoteColliderIdentifiers = new List<EntityIdentifier>();
+
+    [TabGroup("Entity Controller", "Info")]
     [SerializeField] protected int _entityID;
 
-    [BoxGroup("Entity Controller Data")]
+    [TabGroup("Entity Controller", "Info")]
     [SerializeField] protected Faction _faction;
 
-    [BoxGroup("Entity Controller Data")]
+    [TabGroup("Entity Controller", "Info")]
     [SerializeField] protected bool _isAwake = false;
 
-    [BoxGroup("Entity Controller Data")]
+    [TabGroup("Entity Controller", "Info")]
     [SerializeField] protected bool _isDead = false;
+
+    private IHealthBehavior _healthBehavior;
 
 
     //Monobehaviours
     private void Awake()
     {
         _entityID = GetInstanceID();
+        _healthBehavior = GetComponent<IHealthBehavior>();
+        InitializeRemoteColliderIdentifiers();
         InitializeOtherUtilities();
     }
 
 
 
     //Internals
+    protected virtual void InitializeRemoteColliderIdentifiers()
+    {
+        foreach(EntityIdentifier identifier in _remoteColliderIdentifiers)
+        {
+            identifier.SetID(_entityID);
+            identifier.SetHealthBehaviour(_healthBehavior);
+        }
+    }
     protected abstract void InitializeOtherUtilities();
     protected abstract void ApplyOtherReactionToDeath();
     protected abstract void ApplyOtherReactionToAwaken();
@@ -93,5 +111,10 @@ public abstract class AbstractController : MonoBehaviour, IEntityController, IEn
             ApplyOtherReactionToAwaken();
         }
         
+    }
+
+    public virtual IHealthBehavior GetHealthBehavior()
+    {
+        return _healthBehavior;
     }
 }

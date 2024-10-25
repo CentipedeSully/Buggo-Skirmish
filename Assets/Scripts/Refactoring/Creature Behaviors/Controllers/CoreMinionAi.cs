@@ -30,30 +30,25 @@ public class CoreMinionAi : AbstractCreatureBehavior
 
 
     //Externals
-    [BoxGroup("Debug")]
+    [TabGroup("Creature", "Debug")]
     [Button]
     public void MoveToPosition(Vector3 position)
     {
         _moveBehavior.MoveToLocation(position);
     }
 
-    [BoxGroup("Debug")]
+    [TabGroup("Creature", "Debug")]
     [Button]
     public void ApproachObject(Transform target)
     {
         _moveBehavior.ApproachObject(target);
     }
 
-    [BoxGroup("Debug")]
+    [TabGroup("Creature", "Debug")]
     [Button]
     public void CancelMovement()
     {
         _moveBehavior.ClearCurrentMovement();
     }
 
-    protected override void ApplyOtherReactionToAwaken()
-    {
-        
-        //pass
-    }
 }

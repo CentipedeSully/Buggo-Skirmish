@@ -167,20 +167,33 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
             //Attempt to find our target amongst any detections
             foreach (Collider detection in detections)
             {
-                //has our target been detected?
-                if (detection.GetComponent<IEntityID>().GetEntityID() == _currentTargetID)
+                IEntityID identifierBehavior = detection.GetComponent<IEntityID>();
+
+                //Does this detection have an identifierBehviour
+                if (identifierBehavior != null)
                 {
-                    //Damage the target
-                    ///Idea
-                    ///Have every collider that's attackable have a HealthBehavior that references an EntityID
+                    //has our target been detected?
+                    if (identifierBehavior.GetEntityID() == _currentTargetID)
+                    {
+                        //Find the Health behavior. Assume the 
+                        IHealthBehavior healthBehavior = identifierBehavior.GetHealthBehavior();
 
-                    //cancel any timers that're counting the duration of this cast
-                    CancelInvoke(nameof(EndAttackCast));
+                        if (healthBehavior != null)
+                        {
+                            //communicate damage
+                            healthBehavior.TakeDamage(gameObject, _damage);
 
-                    //End the cast, the target has been hit
-                    EndAttackCast();
-                    return;
+                            //cancel any timers that're counting the duration of this cast
+                            CancelInvoke(nameof(EndAttackCast));
+
+                            //End the cast, the target has been hit
+                            EndAttackCast();
+                            return;
+                        }
+                            
+                    }
                 }
+                
             }
         }
     }
@@ -290,16 +303,17 @@ public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
         if (newTarget != null)
         {
 
-            IEntityController controller = newTarget.GetComponent<IEntityController>();
+            IEntityID identityBehaviour = newTarget.GetComponent<IEntityID>();
 
-            //only target objects with controllers. Do this to get their controllerID. Used for atttack casting.
-            if (controller != null)
+            //only target objects with identities. Do this to get their ID.
+            //Used for atttack casting, in case an object has multiple attackable colliders across different objects.
+            if (identityBehaviour != null)
             {
                 if (_isAttacking)
                     InterruptAttack();
 
                 _currentTargetObject = newTarget;
-                _currentTargetID = controller.GetEntityID();
+                _currentTargetID = identityBehaviour.GetEntityID();
             }
         }
         

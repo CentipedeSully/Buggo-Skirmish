@@ -42,17 +42,14 @@ public interface ICreatureController
 public abstract class AbstractCreatureBehavior : AbstractController, ICreatureController
 {
     //Declarations
-    [BoxGroup("Creature Setup")]
+    [TabGroup("Creature", "Setup")]
     [SerializeField] protected CreatureData _creatureData;
 
-    [BoxGroup("Creature Info")]
+    [TabGroup("Creature", "Info")]
     [SerializeField] protected CreatureState _state;
 
-    [BoxGroup("Creature Info")]
+    [TabGroup("Creature", "Info")]
     [SerializeField] protected CreatureType _type;
-
-    [BoxGroup("Debug")]
-    [SerializeField] protected bool _isDebugActive = false;
 
 
 
@@ -86,6 +83,11 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     protected override void ApplyOtherReactionToDeath()
     {
         InterruptCreatureBehaviors();
+    }
+
+    protected override void ApplyOtherReactionToAwaken()
+    {
+        //pass
     }
 
 

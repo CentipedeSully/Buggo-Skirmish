@@ -2421,6 +2421,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Minion
       objectReference: {fileID: 0}
+    - target: {fileID: 2172155995519425958, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6541445917778611595, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2460,6 +2464,10 @@ PrefabInstance:
     - target: {fileID: 6541445917778611595, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7927123354642777807, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2652,6 +2660,10 @@ PrefabInstance:
     - target: {fileID: 420488035087495490, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 962393880635138187, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _angleTolerance
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: _cameraPivot
