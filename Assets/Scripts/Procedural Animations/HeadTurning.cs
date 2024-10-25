@@ -14,8 +14,6 @@ public class HeadTurning : MonoBehaviour
     [SerializeField] private Color _headRayColor = Color.yellow;
     [SerializeField] private Color _destinationColor = Color.red;
     [SerializeField] private Color _bodyRayColor = Color.magenta;
-    private Vector3 _headForwards;
-    private Vector3 _bodyForwards;
 
 
     //Monobehaviours
@@ -64,7 +62,7 @@ public class HeadTurning : MonoBehaviour
         float signedAngleToDestination = Vector3.SignedAngle(transform.forward, _targetVectorDirection, Vector3.up);
 
         //calculate the angle from the body's forwards direction to head's forwards direction
-        float signedAngleFromBody = Vector3.SignedAngle(_targetVectorDirection, transform.forward, Vector3.up);
+        float signedAngleFromBody = Vector3.SignedAngle(_bodyTransform.forward, transform.forward, Vector3.up);
 
 
         //Are we turning towards the right (while remaining within our head's range of rotation)?

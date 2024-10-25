@@ -1032,9 +1032,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _bodyTransform: {fileID: 4828504803202077511}
   _turnSpeed: 120
-  _maxTurnRotation: 60
-  _angleTolerance: 0.5
+  _maxTurnRotation: 75
   _headRayColor: {r: 1, g: 0, b: 0, a: 1}
+  _destinationColor: {r: 1, g: 0, b: 0, a: 1}
   _bodyRayColor: {r: 1, g: 0, b: 1, a: 1}
 --- !u!1 &4081233336315749516
 GameObject:
