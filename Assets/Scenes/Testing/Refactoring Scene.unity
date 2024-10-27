@@ -2431,7 +2431,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6541445917778611595, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.52
       objectReference: {fileID: 0}
     - target: {fileID: 6541445917778611595, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2673,6 +2673,10 @@ PrefabInstance:
       propertyPath: _shoulderCam
       value: 
       objectReference: {fileID: 1411216889}
+    - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _cameraRotationSpeed
+      value: 120
+      objectReference: {fileID: 0}
     - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: _playerInputReference
       value: 

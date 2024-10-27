@@ -14,8 +14,11 @@ GameObject:
   - component: {fileID: 7657371366143646137}
   - component: {fileID: 2172155995519425958}
   - component: {fileID: 5667215281668748393}
+  - component: {fileID: 8727483246022734230}
   - component: {fileID: 6808936925571856432}
   - component: {fileID: 3699985054397795214}
+  - component: {fileID: 950322237683978253}
+  - component: {fileID: 4856615881615017980}
   m_Layer: 7
   m_Name: Minion
   m_TagString: Actor
@@ -124,12 +127,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 900e07fa5f007264abea8daa42d40440, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _headTurnAnimator: {fileID: 7927123354642777807}
   _feetAnimators:
   - {fileID: 2290622542813055593}
   - {fileID: 4571634125178224121}
   - {fileID: 3427519832454377836}
   - {fileID: 2527598624828033056}
-  _headTurnAnimator: {fileID: 7927123354642777807}
 --- !u!114 &5667215281668748393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +151,18 @@ MonoBehaviour:
   _invincTimeAfterHit: 0
   _damageInterruptsAttacks: 1
   _damageDropsItems: 1
+--- !u!114 &8727483246022734230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420488035087495490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7518fc555a0bed4f8bfe6d785095c26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!195 &6808936925571856432
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -192,11 +207,42 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 126
+  m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &950322237683978253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420488035087495490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a075b6d9103d3943b2f17cc29ca1c01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _carryPosition: {fileID: 8800417827590636510}
+  _carriedObject: {fileID: 0}
+  _isCarryingObject: 0
+--- !u!114 &4856615881615017980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420488035087495490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 293ac4605ef453241aa21d26546306c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isCarriableEnabled: 0
+  _isBeingCarried: 0
+  _isReadyToBePickedUp: 1
+  _pickupCooldown: 1.5
 --- !u!1001 &4631950508421039744
 PrefabInstance:
   m_ObjectHideFlags: 0

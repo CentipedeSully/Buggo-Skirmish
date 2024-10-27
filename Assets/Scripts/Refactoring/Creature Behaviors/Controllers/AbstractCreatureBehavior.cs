@@ -51,7 +51,8 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     [TabGroup("Creature", "Info")]
     [SerializeField] protected CreatureType _type;
 
-
+    protected RagdollCommunicator _ragdollCommunicator;
+    protected ICarriable _selfCarriableBehavior;
 
 
     //Monobehaviours
@@ -69,6 +70,9 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     protected virtual void InitializeCreatureReferences()
     {
         _type = _creatureData.GetCreatureType();
+
+        _ragdollCommunicator = GetComponent<RagdollCommunicator>();
+
     }
     protected void InitializeCreatureBehaviors()
     {
@@ -83,6 +87,10 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     protected override void ApplyOtherReactionToDeath()
     {
         InterruptCreatureBehaviors();
+        _ragdollCommunicator.ToggleRagdoll(true);
+
+        //Become a valid carriable
+        _selfCarriableBehavior?.EnableCarry(true);
     }
 
     protected override void ApplyOtherReactionToAwaken()

@@ -12,6 +12,7 @@ public class CoreMinionAi : AbstractCreatureBehavior
     //Declarations
     private IAiMoveBehavior _moveBehavior;
     private IAttackBehaviour _attackBehavior;
+    private ICarryBehavior _carryBehavior;
 
 
 
@@ -26,6 +27,8 @@ public class CoreMinionAi : AbstractCreatureBehavior
         base.InitializeCreatureReferences();
         _moveBehavior = GetComponent<IAiMoveBehavior>();
         _attackBehavior = GetComponent<IAttackBehaviour>();
+        _carryBehavior = GetComponent<ICarryBehavior>();
+        
     }
 
 
