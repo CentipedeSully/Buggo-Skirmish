@@ -72,6 +72,7 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
         _type = _creatureData.GetCreatureType();
 
         _ragdollCommunicator = GetComponent<RagdollCommunicator>();
+        _selfCarriableBehavior = GetComponent<ICarriable>();
 
     }
     protected void InitializeCreatureBehaviors()
@@ -87,7 +88,7 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     protected override void ApplyOtherReactionToDeath()
     {
         InterruptCreatureBehaviors();
-        _ragdollCommunicator.ToggleRagdoll(true);
+        _ragdollCommunicator?.ToggleRagdoll(true);
 
         //Become a valid carriable
         _selfCarriableBehavior?.EnableCarry(true);
