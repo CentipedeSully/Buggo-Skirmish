@@ -11,14 +11,14 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _turnSpeed;
     private NavMeshAgent _navAgent;
-    private CommunicateMovementToAnimators _animatorCommunicator;
+    private CommunicateToAnimators _animatorCommunicator;
 
 
     //Monobehaviours
     private void Awake()
     {
         _navAgent = GetComponent<NavMeshAgent>();
-        _animatorCommunicator =GetComponent<CommunicateMovementToAnimators>();
+        _animatorCommunicator =GetComponent<CommunicateToAnimators>();
     }
 
     private void Update()

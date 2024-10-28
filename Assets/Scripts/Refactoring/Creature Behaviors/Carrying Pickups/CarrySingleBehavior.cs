@@ -22,6 +22,7 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
     private float _lerpDuration = .2f;
     private float _currentLerpTime = 0;
     private Vector3 _startPosition;
+    private CommunicateToAnimators _animatorCommunicator;
 
 
 
@@ -29,6 +30,10 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
 
 
     //Monobehaviours
+    private void Awake()
+    {
+        _animatorCommunicator = GetComponent<CommunicateToAnimators>();
+    }
     private void Update()
     {
         LerpObjectOnPickup();
@@ -80,6 +85,14 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
 
             //forget the object
             _carriedObject = null;
+
+            //Update animators
+            if (_animatorCommunicator != null)
+            {
+                _animatorCommunicator.SetHeadPitch(HeadPitchState.neutral);
+                _animatorCommunicator.SetMandibles(JawState.open);
+            }
+            
         }
         
     }
@@ -118,6 +131,13 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
                 //begin smoothly transitioning the item into place overtime
                 _startPosition = _carriedObject.transform.position;
                 _isLerping = true;
+
+                //update animators
+                if (_animatorCommunicator != null)
+                {
+                    _animatorCommunicator.SetHeadPitch(HeadPitchState.raised);
+                    _animatorCommunicator.SetMandibles(JawState.closed);
+                }
 
             }
 

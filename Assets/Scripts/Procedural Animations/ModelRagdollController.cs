@@ -45,6 +45,7 @@ public class ModelRagdollController : MonoBehaviour
         }
     }
 
+    public bool IsRagdollEnabled() { return _isRagdollEnabled; }
 
 
 

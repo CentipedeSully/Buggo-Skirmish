@@ -37,7 +37,7 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
     [SerializeField] private Camera _shoulderCam;
     [SerializeField] private Transform _cameraPivot;
     private Rigidbody _rigidbody;
-    private CommunicateMovementToAnimators _animatorCommunicator;
+    private CommunicateToAnimators _animatorCommunicator;
     private InputAction _moveInputAction;
     private InputAction _mouseMovementInputAction;
 
@@ -69,7 +69,7 @@ public class MoveViaDirectionalInput : MonoBehaviour, IPlayerMoveBehavior, ICrea
     private void InitializeReferences()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        _animatorCommunicator = GetComponent<CommunicateMovementToAnimators>();
+        _animatorCommunicator = GetComponent<CommunicateToAnimators>();
 
         //Collect action references
         _moveInputAction = _playerInputReference.actions.FindAction("PlayerMovement");

@@ -15,7 +15,6 @@ public class CoreMinionAi : AbstractCreatureBehavior
     private ICarryBehavior _carryBehavior;
 
 
-
     //Monobehaviours
 
 
