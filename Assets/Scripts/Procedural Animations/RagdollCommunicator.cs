@@ -5,7 +5,7 @@ using UnityEngine.AI;
 public class RagdollCommunicator : MonoBehaviour
 {
     //Declarations
-    private ModelRagdollController _ragdollController;
+    private RagdollController _ragdollController;
     private Rigidbody _controllerRb;
     private NavMeshAgent _navAgent;
 
@@ -13,11 +13,11 @@ public class RagdollCommunicator : MonoBehaviour
     //Monobehaviours
     private void Awake()
     {
-        _ragdollController = GetComponentInChildren<ModelRagdollController>();
+        _ragdollController = GetComponentInChildren<RagdollController>();
         _controllerRb = GetComponent<Rigidbody>();
         _navAgent = GetComponent<NavMeshAgent>();
 
-        _ragdollController.ConnectControllerRbToModel(_controllerRb);
+        _ragdollController.SetParentRb(_controllerRb);
         
     }
 
@@ -38,7 +38,6 @@ public class RagdollCommunicator : MonoBehaviour
         {
             //disable any navAgent and unlock any movementRb
             _navAgent.enabled = !state;
-            _controllerRb.isKinematic = !state;
 
             _ragdollController.SetRagdoll(state);
         }

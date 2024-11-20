@@ -4,9 +4,10 @@ public class EntityIdentifier : MonoBehaviour, IEntityID
 {
     //Declarations
     [SerializeField] private int _entityID;
-    private IHealthBehavior _healthBehavior;
-
-
+    [SerializeField] private Faction _faction;
+    [SerializeField] private IHealthBehavior _healthBehavior;
+    private bool _isDead = false;
+    private bool _isAwake = false;
 
     //Monobehaviours
     private void Awake()
@@ -22,7 +23,7 @@ public class EntityIdentifier : MonoBehaviour, IEntityID
         //Useful for simple objects with no big controller scripts
         _entityID = GetInstanceID();
 
-
+        //Attempt to find a health behaviour on this object
         _healthBehavior = GetComponent<IHealthBehavior>();
     }
 
@@ -31,11 +32,6 @@ public class EntityIdentifier : MonoBehaviour, IEntityID
     public void SetID(int ID)
     {
         _entityID = ID;
-    }
-
-    public void SetHealthBehaviour(IHealthBehavior health)
-    {
-        _healthBehavior = health;
     }
 
     public int GetEntityID()
@@ -48,8 +44,21 @@ public class EntityIdentifier : MonoBehaviour, IEntityID
         return gameObject;
     }
 
-    public IHealthBehavior GetHealthBehavior()
+    public Faction GetFaction() {return _faction; }
+
+    public bool IsDead()
     {
-        return _healthBehavior;
+        if (_healthBehavior != null)
+            return _healthBehavior.IsDead();
+        else return _isDead;
     }
+
+    public bool IsAwake()
+    {
+        return _isAwake;
+    }
+
+    public void SetDeathState(bool newState) { _isDead = newState; }
+    public void SetAwakeState(bool newState) { _isAwake = newState; }
+    public void SetFaction(Faction newFaction) {  _faction = newFaction; }
 }

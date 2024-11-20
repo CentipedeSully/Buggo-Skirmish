@@ -1,14 +1,25 @@
 using UnityEngine;
 using Sirenix;
 using Sirenix.OdinInspector;
+using System;
 
 public interface IHealthBehavior
 {
     int CurrentHealth();
     int MaxHealth();
     bool IsDead();
-    void TakeDamage(GameObject source, int damage);
+    bool IsInInvincRecovery();
+    void TakeDamage(DamageInfo dmgInfo);
     GameObject GetGameObject();
+}
+
+[Serializable]
+public struct DamageInfo
+{
+    public int Damage;
+    public Vector3 SourceDirection;
+    public int AttackerID;
+    public Faction AttackerFaction;
 }
 
 public abstract class AbstractHealthBehaviour: MonoBehaviour, IHealthBehavior
@@ -57,7 +68,7 @@ public abstract class AbstractHealthBehaviour: MonoBehaviour, IHealthBehavior
         _currentHealth -= damage;
     }
 
-    protected abstract void ApplyOtherReactionsToDamage(GameObject source, int damage);
+    protected abstract void ApplyOtherReactionsToDamage(DamageInfo dmgInfo);
 
     protected virtual void EitherDieOrEnterRecovery()
     {
@@ -78,12 +89,12 @@ public abstract class AbstractHealthBehaviour: MonoBehaviour, IHealthBehavior
     //Externals
     [TabGroup("Health Behavior", "Debug")]
     [Button]
-    public virtual void TakeDamage(GameObject source, int damage)
+    public virtual void TakeDamage(DamageInfo dmgInfo)
     {
         if (!_isDead && !_isInInvincRecovery)
         {
-            ApplyDamage(damage);
-            ApplyOtherReactionsToDamage(source, damage);
+            ApplyDamage(dmgInfo.Damage);
+            ApplyOtherReactionsToDamage(dmgInfo);
             EitherDieOrEnterRecovery();
         }
     }
@@ -93,7 +104,7 @@ public abstract class AbstractHealthBehaviour: MonoBehaviour, IHealthBehavior
     public int MaxHealth() { return _maxHealth; }
     public bool IsDead() { return _isDead; }
 
-
+    public bool IsInInvincRecovery(){return _isInInvincRecovery;}
 }
 
 

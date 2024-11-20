@@ -3,44 +3,54 @@ using System.Collections.Generic;
 
 public class CommunicateToAnimators : MonoBehaviour
 {
-    [SerializeField] private HeadTurning _headTurnAnimator;
-    [SerializeField] private List<FootDisplacement> _feetAnimators;
-    [SerializeField] private HeadPitchController _headPitchController;
+    [SerializeField] private LookAtController _lookAtController;
+    [SerializeField] private FootDisplacementManager _footDisplacementManager;
     [SerializeField] private MandiblesController _mandiblesController;
+    [SerializeField] private Vector3 _minionHeadPickupOffset;
 
-    public void MoveFeetViaDisplacement(Vector3 frameDisplacement)
-    {
-        foreach (FootDisplacement footAnimator in _feetAnimators)
-            footAnimator.NegateMovement(frameDisplacement);
-    }
 
     public void TurnHead(Vector3 moveDirection)
     {
-        _headTurnAnimator.SetTargetDirection(moveDirection);
+        _lookAtController.LookAtPosition(moveDirection);
+    }
+
+    public void MoveFeetViaDisplacement(Vector3 moveDirection)
+    {
+        if (_footDisplacementManager != null)
+            _footDisplacementManager.ApplyOffsetVelocityToFeets(moveDirection);
     }
 
     public void ReturnHeadToNeutral()
     {
-        _headTurnAnimator.ReturnToNeutral();
+        _lookAtController.ReturnHeadToNeutral();
     }
 
     public void StopTurningHead()
     {
-        _headTurnAnimator.StopTurningHead();
+        _lookAtController.InterruptCurrentTransition();
     }
 
     public void SetMandibles(JawState newState) { _mandiblesController.SetJawState(newState); }
 
     public void InterruptMandibles() { _mandiblesController.InterruptTransition(); }
 
-    public void SetHeadPitch(HeadPitchState newState) { _headPitchController.SetPitch(newState); }
-
-    public void InterruptHeadPitching() { _headPitchController.InterruptAdjustment(); }
-
     public void InterruptAllAnimators()
     {
         StopTurningHead();
-        InterruptHeadPitching();
         InterruptMandibles();
+    }
+
+    public void SetPickupAnimation(bool isCarrying, CreatureType creatureType)
+    {
+        //Minions tilt their heads up when carrying something
+        //Other creatures may behave differently...
+        if (creatureType == CreatureType.minion)
+        {
+            if (isCarrying)
+                _lookAtController.SetOffset(_minionHeadPickupOffset);
+
+            else
+                _lookAtController.ClearOffset();
+        }
     }
 }

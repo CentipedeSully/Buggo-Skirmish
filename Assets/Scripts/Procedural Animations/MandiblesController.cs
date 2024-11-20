@@ -29,6 +29,7 @@ public class MandiblesController : MonoBehaviour
 
 
     [TabGroup("Mandibles Controller", "Info")]
+    [ReadOnly]
     [SerializeField] private JawState _jawState = JawState.unset;
     private JawState _targetState = JawState.unset;
 

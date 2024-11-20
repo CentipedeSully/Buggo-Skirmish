@@ -2421,6 +2421,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Minion
       objectReference: {fileID: 0}
+    - target: {fileID: 420488035087495490, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2172155995519425958, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -2465,9 +2469,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7927123354642777807, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
-      propertyPath: m_Enabled
-      value: 1
+    - target: {fileID: 6745385347115744748, guid: fb121cb701d1d314ca5766a7df174e7e, type: 3}
+      propertyPath: _faction
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2657,13 +2661,61 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1130117230}
     m_Modifications:
+    - target: {fileID: 29947328237111698, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 420488035087495490, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 962393880635138187, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
-      propertyPath: _angleTolerance
+    - target: {fileID: 420488035087495490, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _atkRadius
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _showCastGizmos
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _atkCastDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _atkCooldownDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _atkRecoveryDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1097162030863499492, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _atkPreparationDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1523264061175259838, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_Name
+      value: Head Position Target
+      objectReference: {fileID: 0}
+    - target: {fileID: 2600976563263702259, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _faction
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4119179480394092090, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsKinematic
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4161123218409452043, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: _duration
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4214013147506053942, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: _cameraPivot
@@ -2674,10 +2726,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1411216889}
     - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
-      propertyPath: _cameraRotationSpeed
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 6040948522068848497, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: _playerInputReference
       value: 
       objectReference: {fileID: 664154913}
@@ -2687,7 +2735,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6541445917778611595, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.228
       objectReference: {fileID: 0}
     - target: {fileID: 6541445917778611595, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2721,7 +2769,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7335227271608781780, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8276799911105400841, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3096599698158134565, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
+    - {fileID: 6577562568421846920, guid: 9276b50ad06946a4ea6ba12ce2c4101f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

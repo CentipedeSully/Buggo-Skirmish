@@ -46,9 +46,11 @@ public abstract class AbstractCreatureBehavior : AbstractController, ICreatureCo
     [SerializeField] protected CreatureData _creatureData;
 
     [TabGroup("Creature", "Info")]
+    [ReadOnly]
     [SerializeField] protected CreatureState _state;
 
     [TabGroup("Creature", "Info")]
+    [ReadOnly]
     [SerializeField] protected CreatureType _type;
 
     protected RagdollCommunicator _ragdollCommunicator;

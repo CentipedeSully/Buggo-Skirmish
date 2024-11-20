@@ -11,6 +11,7 @@ public class CreatureHealthBehavior : AbstractHealthBehaviour, ICreatureBehavior
 
     private ICreatureController _controller;
     private IAttackBehaviour _atkBehavour;
+    private ICarryBehavior _carryBehavior;
 
 
     //Monobehaviours
@@ -25,13 +26,13 @@ public class CreatureHealthBehavior : AbstractHealthBehaviour, ICreatureBehavior
     {
         _atkBehavour = GetComponent<IAttackBehaviour>();
         _controller = GetComponent<ICreatureController>();
+        _carryBehavior = GetComponent<ICarryBehavior>();
     }
 
     private void InterruptAttack()
     {
         if (_damageInterruptsAttacks && _atkBehavour != null)
         {
-            Debug.Log("Attack Interruption Sent");
             _atkBehavour.InterruptAttack();
         }
             
@@ -41,13 +42,11 @@ public class CreatureHealthBehavior : AbstractHealthBehaviour, ICreatureBehavior
     {
         if (_damageDropsItems)
         {
-            Debug.Log("Carry Interruption Sent");
-            //empty ya pockets!
-            //...
+            _carryBehavior.DropItem();
         }
     }
 
-    protected override void ApplyOtherReactionsToDamage(GameObject source, int damage)
+    protected override void ApplyOtherReactionsToDamage(DamageInfo dmgInfo)
     {
         InterruptAttack();
         DropItems();

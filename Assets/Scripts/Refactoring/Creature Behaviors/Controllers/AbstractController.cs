@@ -30,7 +30,11 @@ public interface IEntityID
 
     public GameObject GetGameObject();
 
-    public IHealthBehavior GetHealthBehavior();
+    public Faction GetFaction();
+
+    public bool IsDead();
+
+    public bool IsAwake();
 }
 
 
@@ -39,17 +43,22 @@ public abstract class AbstractController : MonoBehaviour, IEntityController, IEn
     //Declarations
     [TabGroup("Entity Controller", "Setup")]
     [SerializeField] private List<EntityIdentifier> _remoteColliderIdentifiers = new List<EntityIdentifier>();
+    [TabGroup("Entity Controller", "Setup")]
+    [SerializeField] private List<RemoteHealthExtension> _remoteHealthRefs = new List<RemoteHealthExtension>();
 
     [TabGroup("Entity Controller", "Info")]
+    [ReadOnly]
     [SerializeField] protected int _entityID;
 
     [TabGroup("Entity Controller", "Info")]
     [SerializeField] protected Faction _faction;
 
     [TabGroup("Entity Controller", "Info")]
+    [ReadOnly]
     [SerializeField] protected bool _isAwake = false;
 
     [TabGroup("Entity Controller", "Info")]
+    [ReadOnly]
     [SerializeField] protected bool _isDead = false;
 
     private IHealthBehavior _healthBehavior;
@@ -61,6 +70,7 @@ public abstract class AbstractController : MonoBehaviour, IEntityController, IEn
         _entityID = GetInstanceID();
         _healthBehavior = GetComponent<IHealthBehavior>();
         InitializeRemoteColliderIdentifiers();
+        InitializeRemoteHealthExtensions();
         InitializeOtherUtilities();
     }
 
@@ -72,7 +82,14 @@ public abstract class AbstractController : MonoBehaviour, IEntityController, IEn
         foreach(EntityIdentifier identifier in _remoteColliderIdentifiers)
         {
             identifier.SetID(_entityID);
-            identifier.SetHealthBehaviour(_healthBehavior);
+            identifier.SetFaction(_faction);
+        }
+    }
+    protected virtual void InitializeRemoteHealthExtensions()
+    {
+        foreach (RemoteHealthExtension extension in _remoteHealthRefs)
+        {
+            extension.SetHealthBehavior(_healthBehavior);
         }
     }
     protected abstract void InitializeOtherUtilities();

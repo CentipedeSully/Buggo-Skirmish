@@ -2,339 +2,124 @@ using UnityEngine;
 using System.Collections;
 using Sirenix;
 using Sirenix.OdinInspector;
-
-public interface IAttackBehaviour
-{
-    void AttemptAttack();
-    void InterruptAttack();
-    void SetTarget(GameObject newTarget);
-    GameObject GetCurrentTarget();
-    bool IsAttacking();
-}
+using System.Runtime.InteropServices.WindowsRuntime;
+using Unity.VisualScripting;
+using System.Collections.Generic;
 
 
 
-public class BiteAttack : MonoBehaviour, IAttackBehaviour, ICreatureBehavior
+
+
+
+
+public class BiteAttack : AbstractCreatureAttack
 {
     //Declarations
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private LayerMask _attackLayerMask;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private Transform _atkCastOffset;
-
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private float _atkCastRadius = 2;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private Color _atkRangeGizmoColor = Color.red;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private bool _showAtkRangeGizmo = false;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private float _atkAnimDuration;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField][Range(0, 1)] private float _atkCastRelativeStartTime;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private float _atkCastDuration = .2f;
-
-    [TabGroup("Bite Attack", "Setup")]
-    [Tooltip("How much tolerance does this minion have when turning to face a target. 0 means no tolerance. 180 means 'I don't need to see you to hit you'")]
-    [SerializeField][Range(0, 180)] private float _atkAlignmentTolerance = 10;
-    [TabGroup("Bite Attack", "Setup")]
-    [SerializeField] private bool _showAtkAlignmentRays = false;
-
-
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private GameObject _currentTargetObject;
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private int _currentTargetID;
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private bool _isAtkReady = true;
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private bool _isAttacking = false;
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private int _damage;
-    [TabGroup("Bite Attack", "Info")]
-    [SerializeField] private float _atkCooldown = .5f;
-
     
-    private float _alignmentRotationSpeed = 90;
-    private IEnumerator _atkSequence = null;
-    private float _atkCastStartTime;
-    private float _remainingAtkTime;
-    private bool _isCastingAttack = false;
-    private bool _isAtkCoolingDown = false;
+    [TabGroup("General Settings", "Damage & Casting")]
+    [SerializeField] protected float _atkRadius;
+    [TabGroup("General Settings", "Damage & Casting")]
+    [SerializeField] protected Color _biteAreaGizmoColor = Color.red;
+    [TabGroup("Attack Features")]
+    [SerializeField] protected bool _doesAtkPierceMultipleEntities = false;
+    [TabGroup("Attack Features")]
+    [SerializeField] [ReadOnly] protected bool _isAtkCastSatisfied = false;
+    [BoxGroup("Debugging")]
+    [SerializeField] [ReadOnly] protected Dictionary<int, int> _hitIDsDuringCast = new();
 
 
 
     //Monobehaviours
-    private void OnDrawGizmosSelected()
+    private void Update()
     {
-        DrawRangeGizmos();
+        //are we in the CastAtk state && have we NOT reached our hit limit
+        if (_atkState == AtkState.castingAtk && !_isAtkCastSatisfied)
+            CaptureDetectionsAndApplyDamage();
     }
 
 
 
 
     //Internals
-    private void DrawRangeGizmos()
+    protected override void DrawAttackGizmos()
     {
-        if (_showAtkRangeGizmo)
-        {
-            Gizmos.color = _atkRangeGizmoColor;
-            Gizmos.DrawWireSphere(_atkCastOffset.position, _atkCastRadius);
-        }
+        Gizmos.color = _biteAreaGizmoColor;
+        Gizmos.DrawWireSphere(_atkOrigin.position, _atkRadius);
     }
 
-    private void AlignAttack()
+    protected void CaptureDetectionsAndApplyDamage()
     {
-        //is our target valid (and we aren't already committed to an attack)
-        if (_currentTargetObject != null && !_isAttacking)
+        Debug.Log("Detecting...");
+
+        //Cast a sphere of detection
+        Collider[] currentDetections = Physics.OverlapSphere(_atkOrigin.position, _atkRadius, _detectionMask);
+
+        foreach (Collider collider in currentDetections)
         {
-            //Calculate the direction towards the target
-            Vector3 targetDirection = _currentTargetObject.transform.position - transform.position;
+            //Get the entity's identification
+            IEntityID detectionIdentity = collider.GetComponent<IEntityID>();
+            
 
-            //ignore the direction's y, In cases where enemies are too short or too high
-            targetDirection = new Vector3(targetDirection.x, 0, targetDirection.z);
-
-            //Normalize the direction
-            Vector3 normalizedDirectionTowardsTarget = targetDirection.normalized;
-
-            //calculate our forwards direction (in world space)
-            Vector3 forwardsDirection = transform.TransformVector(Vector3.forward);
-
-            //Draw the alignment vectors used in our calculations, if needed
-            if (_showAtkAlignmentRays)
+            if (detectionIdentity != null) 
             {
-                Debug.DrawRay(transform.position, forwardsDirection * 5, Color.red);
-                Debug.DrawRay(transform.position, normalizedDirectionTowardsTarget * 5, Color.yellow);
-            }
+                Debug.Log($"Detected Entity: {detectionIdentity.GetGameObject()}");
+                //make sure the target is valid:
+                //is entity of a different faction?
+                //is entity alive?
+                //has entity not already been hit by us?
+                //is entity NOT US
 
-            //calculate the angle between our forwards and the normalizedTargetDirection
-            float angleDifference = Vector3.SignedAngle(forwardsDirection, normalizedDirectionTowardsTarget, Vector3.up);
-
-            //Log the angular difference, if needed (Use this in case the minion approaches a target but doesn't attack it)
-            //Debug.Log($"angle difference: {angleDifference}");
-
-            //is the target within a tolerable alignment
-            if (-_atkAlignmentTolerance <= angleDifference && angleDifference <= _atkAlignmentTolerance)
-                EnterAttack();
-
-            //we aren't properly aligned to the target
-            else
-            {
-                //calculate the additive rotation. we're rotating on the y axis in the direction of the angular difference's sign
-                Vector3 additiveRotation = Mathf.Sign(angleDifference) * Vector3.up * _alignmentRotationSpeed * Time.deltaTime;
-
-                //Apply the rotation
-                transform.eulerAngles += additiveRotation;
-            }
-        }
-    }
-
-    private void ReadyAtk()
-    {
-        _isAtkCoolingDown = false;
-        _isAtkReady = true;
-    }
-
-    private void CooldownAtk()
-    {
-        if (!_isAtkCoolingDown)
-        {
-            _isAtkCoolingDown = true;
-            Invoke(nameof(ReadyAtk), _atkCooldown);
-        }
-    }
-
-    private void CastAttack()
-    {
-        //if we're in the cast state
-        if (_isCastingAttack)
-        {
-            //Did our target vanish?
-            if (_currentTargetObject == null)
-            {
-                //cancel any timers that're counting the duration of our cast
-                CancelInvoke(nameof(EndAttackCast));
-
-                //end the attack cast now
-                EndAttackCast();
-                return;
-            }
-
-            //Cast over the detection area
-            Collider[] detections = Physics.OverlapSphere(_atkCastOffset.position, _atkCastRadius, _attackLayerMask);
-
-            //Attempt to find our target amongst any detections
-            foreach (Collider detection in detections)
-            {
-                IEntityID identifierBehavior = detection.GetComponent<IEntityID>();
-
-                //Does this detection have an identifierBehviour
-                if (identifierBehavior != null)
+                if ( detectionIdentity.GetFaction() != _damageInfo.AttackerFaction &&
+                     !detectionIdentity.IsDead() &&
+                     !_hitIDsDuringCast.ContainsKey(detectionIdentity.GetEntityID()) &&
+                     detectionIdentity.GetEntityID() != _damageInfo.AttackerID)
                 {
-                    //has our target been detected?
-                    if (identifierBehavior.GetEntityID() == _currentTargetID)
-                    {
-                        //Find the Health behavior. Assume the 
-                        IHealthBehavior healthBehavior = identifierBehavior.GetHealthBehavior();
+                    //Get the entity's healthbehavior
+                    IHealthBehavior healthBehavior = collider.GetComponent<IHealthBehavior>();
 
-                        if (healthBehavior != null)
+                    if (healthBehavior != null) 
+                    { 
+                        //make sure the target isn't invincible.
+                        //It shouldn't be marked as hit if it is invincible
+                        if (!healthBehavior.IsInInvincRecovery())
                         {
-                            //communicate damage
-                            healthBehavior.TakeDamage(gameObject, _damage);
+                            Debug.Log($"Validation Success on {detectionIdentity.GetGameObject()}");
 
-                            //cancel any timers that're counting the duration of this cast
-                            CancelInvoke(nameof(EndAttackCast));
+                            //mark the target as hit. Track the damage done to it
+                            _hitIDsDuringCast[detectionIdentity.GetEntityID()] = _damageInfo.Damage;
 
-                            //End the cast, the target has been hit
-                            EndAttackCast();
-                            return;
+                            //update our damageInfo's attack direciton
+                            _damageInfo.SourceDirection = healthBehavior.GetGameObject().transform.position - transform.position;
+
+                            //deal damage to the target
+                            healthBehavior.TakeDamage(_damageInfo);
+
+                            //Stop hitting entities if we cant pierce multiple enemies
+                            if (!_doesAtkPierceMultipleEntities)
+                            {
+                                _isAtkCastSatisfied = true;
+                                break;
+                            }
+                                
                         }
-                            
                     }
                 }
-                
             }
         }
     }
 
-    private void EndAttackCast()
+    protected override void PerformAdditionalUtilsOnAtkCastEntered()
     {
-        _isCastingAttack = false;
+        //clear the previous hit data
+        _hitIDsDuringCast.Clear();
+        _isAtkCastSatisfied = false;
     }
-
-    private void EnterAttack()
-    {
-        //are we NOT already attacking?
-        if (_atkSequence == null && _isAtkReady)
-        {
-            //Set the atk reference
-            _atkSequence = ManageAttackSequence();
-
-            //calculate the relative atkCast time
-            _atkCastStartTime = _atkAnimDuration * _atkCastRelativeStartTime;
-
-            //calculate the remainder atk time
-            _remainingAtkTime = _atkAnimDuration - _atkCastStartTime;
-
-            //start the sequence
-            StartCoroutine(_atkSequence);
-        }
-    }
-
-    private void CancelAttack()
-    {
-        //are we currently in our attack sequence?
-        if (_atkSequence != null)
-        {
-            //stop the sequence timer
-            StopCoroutine(_atkSequence);
-
-            //Clear the reference
-            _atkSequence = null;
-
-            //leave the atk state
-            _isAttacking = false;
-
-            //stop casting any attacks, if they exist
-            CancelInvoke(nameof(CancelAttack));
-            EndAttackCast();
-
-            //update the animator that we aren't attacking anymore
-            //_bodyAnimator.SetBool("isAttacking", false);
-
-            //Cooldown the attack, if it isn't cooling down already
-            CooldownAtk();
-        }
-    }
-
-    private IEnumerator ManageAttackSequence()
-    {
-        //enter the atk state
-        _isAttacking = true;
-
-        //reest the atk ready state
-        _isAtkReady = false;
-
-        //enter the proper animation
-        //_bodyAnimator.SetBool("isAttacking", true);
-
-        //wait for the atkCast time
-        yield return new WaitForSeconds(_atkCastStartTime);
-
-        //Cast the atk
-        _isCastingAttack = true;
-        Invoke(nameof(EndAttackCast), _atkCastDuration);
-
-        //play the attack sound
-        //_audioController.PlayAttackingSound();
-
-        //wait for the remainder of the sequence
-        yield return new WaitForSeconds(_remainingAtkTime);
-
-        //exit the atk state
-        _isAttacking = false;
-
-        //clear our reference
-        _atkSequence = null;
-
-        //Exit the attack animation
-        //_bodyAnimator.SetBool("isAttacking", false);
-
-        //Cooldown the atk
-        CooldownAtk();
-    }
-
-
 
     //Externals
-    public void ReadCreatureData(CreatureData data)
-    {
-        _damage = data.GetBaseDamage();
-        _alignmentRotationSpeed = data.GetBaseTurnSpeed();
-        _atkCooldown = data.GetBaseAtkCooldown();
-    }
-
-    [TabGroup("Bite Attack", "Debug")]
-    [Button]
-    public void SetTarget(GameObject newTarget)
-    {
-        //ignore blank targets
-        if (newTarget != null)
-        {
-
-            IEntityID identityBehaviour = newTarget.GetComponent<IEntityID>();
-
-            //only target objects with identities. Do this to get their ID.
-            //Used for atttack casting, in case an object has multiple attackable colliders across different objects.
-            if (identityBehaviour != null)
-            {
-                if (_isAttacking)
-                    InterruptAttack();
-
-                _currentTargetObject = newTarget;
-                _currentTargetID = identityBehaviour.GetEntityID();
-            }
-        }
-        
-    }
-
-    [TabGroup("Bite Attack", "Debug")]
-    [Button]
-    public void AttemptAttack() { EnterAttack(); }
-
-    [TabGroup("Bite Attack", "Debug")]
-    [Button]
-    public void InterruptAttack() { CancelAttack(); }
 
 
 
-    public GameObject GetCurrentTarget() {return _currentTargetObject;}
 
-    public bool IsAttacking() { return _isAttacking;}
 
-    public void InterruptBehavior()
-    {
-        InterruptAttack();
-    }
+
 }

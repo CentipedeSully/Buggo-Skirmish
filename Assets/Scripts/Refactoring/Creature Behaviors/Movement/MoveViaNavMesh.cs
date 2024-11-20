@@ -60,10 +60,6 @@ public class MoveViaNavMesh : AbstractAiMoveBehavior
     {
         if (_animatorCommunicator != null)
         {
-            //move feets
-            if (_navAgent.velocity.magnitude > 0)
-                _animatorCommunicator.MoveFeetViaDisplacement(_navAgent.velocity);
-
             //turn head
             _animatorCommunicator.TurnHead(_navAgent.velocity);
         }

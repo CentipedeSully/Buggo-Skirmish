@@ -5,21 +5,25 @@ using UnityEngine;
 public class FootDisplacement : MonoBehaviour
 {
     //Declarations
-    [SerializeField] private FootDisplacement _oppositeFoot;
+    [SerializeField] private FootDisplacement _oppositeFootDisplacementRef;
     [SerializeField] private float _maxFootDistance = .2f;
     [SerializeField] private float _displaceDuration = .2f;
     private float _currentDisplaceDuration = 0;
-    private bool _isLerping = false;
-    [SerializeField] private Transform _foot;
-    [SerializeField] private Transform _target;
-
+    private bool _isLerpInProgress = false;
+    [SerializeField] private Transform _footConstraintSource;
+    [SerializeField] private Transform _neutralPosition;
+    [SerializeField] private bool _isDisplacementEnabled = true;
 
 
 
     //Monobehaviours
     private void Update()
     {
-        LerpFootToTargetIfDistanceTooGreat();
+        if (_isDisplacementEnabled)
+        {
+            CheckFootDistance();
+            LerpConstraintSourceToNeutralPositionIfDistanceTooGreat();
+        }
     }
 
 
@@ -28,30 +32,34 @@ public class FootDisplacement : MonoBehaviour
     //Internals
     private bool IsDistanceTooGreat()
     {
-        float distance = Vector3.Distance(_foot.position, _target.position);
+        float distance = Vector3.Distance(_footConstraintSource.position, _neutralPosition.position);
         return _maxFootDistance < distance;
     }
 
     private void CheckFootDistance()
     {
-        if (IsDistanceTooGreat() && !_isLerping && _oppositeFoot.IsGrounded())
-            _isLerping = true;
+        if (!_isLerpInProgress)
+        {
+            if (IsDistanceTooGreat() && _oppositeFootDisplacementRef.IsGrounded())
+                _isLerpInProgress = true;
+        }
+        
     }
 
-    private void LerpFootToTargetIfDistanceTooGreat()
+    private void LerpConstraintSourceToNeutralPositionIfDistanceTooGreat()
     {
-        if (_isLerping)
+        if (_isLerpInProgress)
         {
             //tick the displacement duration
             _currentDisplaceDuration += Time.deltaTime;
 
             //move the foot
-            _foot.position = Vector3.Lerp(_foot.position, _target.position, _currentDisplaceDuration / _displaceDuration);
+            _footConstraintSource.position = Vector3.Lerp(_footConstraintSource.position, _neutralPosition.position, _currentDisplaceDuration / _displaceDuration);
 
             //reset the lerp if it got completed
             if (_currentDisplaceDuration >= _displaceDuration)
             {
-                _isLerping = false;
+                _isLerpInProgress = false;
                 _currentDisplaceDuration = 0;
             }
         }
@@ -61,18 +69,21 @@ public class FootDisplacement : MonoBehaviour
     //Externals
     public void NegateMovement(Vector3 currentFrameDisplacement)
     {
-        if (!_isLerping)
-        {
-            _foot.position -= currentFrameDisplacement;
-            CheckFootDistance();
-        }
+        if (!_isLerpInProgress)
+            _footConstraintSource.position -= currentFrameDisplacement;
     }
 
     public bool IsGrounded()
     {
-        return !_isLerping;
+        return !_isLerpInProgress;
     }
 
+    public void EnableFootDisplacement(bool newState)
+    {
+        _isDisplacementEnabled = newState;
+    }
+
+    public bool IsFootDisplacementEnabled() {  return _isDisplacementEnabled; }
 
 
 

@@ -16,8 +16,10 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
     //Declarations
     [SerializeField] private Transform _carryPosition;
     [SerializeField] private GameObject _carriedObject;
+    [ReadOnly]
     [SerializeField] private bool _isCarryingObject = false;
 
+    private CreatureType _creatureType = CreatureType.unset;
     private bool _isLerping = false;
     private float _lerpDuration = .2f;
     private float _currentLerpTime = 0;
@@ -89,7 +91,7 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
             //Update animators
             if (_animatorCommunicator != null)
             {
-                _animatorCommunicator.SetHeadPitch(HeadPitchState.neutral);
+                _animatorCommunicator.SetPickupAnimation(false, _creatureType);
                 _animatorCommunicator.SetMandibles(JawState.open);
             }
             
@@ -135,7 +137,7 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
                 //update animators
                 if (_animatorCommunicator != null)
                 {
-                    _animatorCommunicator.SetHeadPitch(HeadPitchState.raised);
+                    _animatorCommunicator.SetPickupAnimation(true,_creatureType);
                     _animatorCommunicator.SetMandibles(JawState.closed);
                 }
 
@@ -146,6 +148,6 @@ public class CarrySingleBehavior : MonoBehaviour, ICreatureBehavior, ICarryBehav
 
     public void ReadCreatureData(CreatureData data)
     {
-        //pass
+        _creatureType = data.GetCreatureType();
     }
 }
